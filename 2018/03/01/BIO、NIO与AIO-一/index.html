@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="java,I/O," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文对java中三种I/O方式的用法以及性能进行比较。这三种I/0方式对应着五大模型中的阻塞模型、多路复用模型、异步模型。I/O的应用场景通常包含磁盘I/O和网络I/O,本文从这两个方面介绍三种IO方式，比较三者之间的性能。">
+<meta name="keywords" content="java,I&#x2F;O">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BIO、NIO与AIO(一)">
+<meta property="og:url" content="https://jiges.github.io/2018/03/01/BIO、NIO与AIO-一/index.html">
+<meta property="og:site_name" content="鸡哥の博客">
+<meta property="og:description" content="本文对java中三种I/O方式的用法以及性能进行比较。这三种I/0方式对应着五大模型中的阻塞模型、多路复用模型、异步模型。I/O的应用场景通常包含磁盘I/O和网络I/O,本文从这两个方面介绍三种IO方式，比较三者之间的性能。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://jiges.github.io/2018/03/01/BIO、NIO与AIO-一/IO流.png">
+<meta property="og:image" content="https://jiges.github.io/2018/03/01/BIO、NIO与AIO-一/overview-channels-buffers.png">
+<meta property="og:image" content="https://jiges.github.io/2018/03/01/BIO、NIO与AIO-一/overview-selectors.png">
+<meta property="og:image" content="https://jiges.github.io/2018/03/01/BIO、NIO与AIO-一/buffers-modes.png">
+<meta property="og:image" content="https://jiges.github.io/2018/03/01/BIO、NIO与AIO-一/Future.png">
+<meta property="og:image" content="https://jiges.github.io/2018/03/01/BIO、NIO与AIO-一/FutureTask.png">
+<meta property="og:image" content="https://jiges.github.io/2018/03/01/BIO、NIO与AIO-一/CompletableFuture.png">
+<meta property="og:updated_time" content="2018-03-14T05:57:30.545Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="BIO、NIO与AIO(一)">
+<meta name="twitter:description" content="本文对java中三种I/O方式的用法以及性能进行比较。这三种I/0方式对应着五大模型中的阻塞模型、多路复用模型、异步模型。I/O的应用场景通常包含磁盘I/O和网络I/O,本文从这两个方面介绍三种IO方式，比较三者之间的性能。">
+<meta name="twitter:image" content="https://jiges.github.io/2018/03/01/BIO、NIO与AIO-一/IO流.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://jiges.github.io/2018/03/01/BIO、NIO与AIO-一/"/>
+
+
+
+
+
+  <title>BIO、NIO与AIO(一) | 鸡哥の博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">鸡哥の博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/index.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://jiges.github.io/2018/03/01/BIO、NIO与AIO-一/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="鸡哥">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/gougou.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鸡哥の博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">BIO、NIO与AIO(一)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-01T14:38:46+08:00">
+                2018-03-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/I-O/" itemprop="url" rel="index">
+                    <span itemprop="name">I/O</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/03/01/BIO、NIO与AIO-一/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/03/01/BIO、NIO与AIO-一/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/03/01/BIO、NIO与AIO-一/" class="leancloud_visitors" data-flag-title="BIO、NIO与AIO(一)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>本文对<code>java</code>中三种<code>I/O</code>方式的用法以及性能进行比较。这三种<code>I/0</code>方式对应着五大模型中的阻塞模型、多路复用模型、异步模型。<code>I/O</code>的应用场景通常包含磁盘<code>I/O</code>和网络<code>I/O</code>,本文从这两个方面介绍三种<code>IO</code>方式，比较三者之间的性能。<br><a id="more"></a></p>
+</blockquote>
+<h1 id="传统IO-BIO"><a href="#传统IO-BIO" class="headerlink" title="传统IO-BIO"></a>传统IO-BIO</h1><p><code>Java.io</code> 包几乎包含了所有操作输入、输出需要的类。所有这些流类代表了输入源和输出目标。<code>Java.io</code> 包中的流支持很多种格式，比如：基本类型、对象、本地化字符集等等。一个流可以理解为一个数据的序列。输入流表示从一个源读取数据，输出流表示向一个目标写数据。</p>
+<h2 id="IO流处理类"><a href="#IO流处理类" class="headerlink" title="IO流处理类"></a>IO流处理类</h2><p><code>Java.io</code> 包中输入流和输出流的类层次图如下：<br><img src="IO流.png" alt="输入流和输出流的类层次图"></p>
+<h2 id="IO流处理类分类"><a href="#IO流处理类分类" class="headerlink" title="IO流处理类分类"></a>IO流处理类分类</h2><p>根据数据处理类型的不同，可将<code>IO流</code>分为字符流和字节流。因为数据编码的不同，而有了对字符进行高效操作的流对象，其本质就是基于字节流读取时，去查了指定的码表。所以<code>java</code>在操作字符流时必须指定字符编码，若果不指定，则使用默认的编码(<code>Unicode</code>)。<br>字符流和字节流的区别：</p>
+<ul>
+<li>读写单位不同：字节流一字节（8bit）为单位，字符流以字符为单位，根据码表映射字符，一次可能读多个字节。</li>
+<li>处理对象不同：字节流能处理所有类型的数据（例如图片，avi），而字符流只能处理字符类型的数据。</li>
+<li>字节流操作的时候本身是不会用到缓冲区的，是对文件本身的直接操作。而字符流在操作的时候是会用到缓冲区的，通过缓冲区来操作文件。</li>
+</ul>
+<p>字符流是为了简化开发提出来的流对象，其底层操作的还是字节流。所以字节流比字符流效率更高。<br>在字节流中。<code>ByteArrayInputStream</code>、<code>StringBufferInputStream</code>、<code>FileInputStream</code> 是三种基本的介质流，它们分别从<code>Byte</code>数组、<code>StringBuffer</code>、和本地文件中读取数据。<code>PipedInputStream</code> 是从与其它线程共用的管道中读取数据。<br><code>ObjectInputStream</code> 和所有<code>FilterInputStream</code>的子类都是装饰流（装饰器模式的主角）。意思是<code>FileInputStream</code>类可以通过一个<code>String</code>路径名创建一个对象，<code>FileInputStream(String name)</code>。而<code>DataInputStream</code>必须装饰一个类才能返回一个对象，<code>DataInputStream(InputStream in)</code>。<br><code>ByteArrayOutputStream</code>、<code>FileOutputStream</code>是两种基本的介质流，它们分别向<code>Byte</code> 数组、和本地文件中写入数据。<code>PipedOutputStream</code> 是向与其它线程共用的管道中写入数据，<code>ObjectOutputStream</code> 和所有<code>FilterOutputStream</code>的子类都是装饰流。</p>
+<h2 id="样例"><a href="#样例" class="headerlink" title="样例"></a>样例</h2><h3 id="向文件中写入2000M的内容"><a href="#向文件中写入2000M的内容" class="headerlink" title="向文件中写入2000M的内容"></a>向文件中写入2000M的内容</h3><p>一字节一字节的输出</p>
+<pre><code class="java"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">writeAFileByBIO</span><span class="params">()</span></span>{
+    <span class="keyword">long</span> length = <span class="number">2000</span> * <span class="number">1024</span> * <span class="number">1024</span>;
+    <span class="keyword">byte</span> b = <span class="number">1</span>;
+    File tmp = <span class="keyword">new</span> File(<span class="string">"E:\\tmp.dat"</span>);
+    FileOutputStream output = <span class="keyword">null</span>;
+    <span class="keyword">try</span> {
+        <span class="keyword">if</span> (!tmp.exists()) {
+           tmp.createNewFile();
+        }
+        output = <span class="keyword">new</span> FileOutputStream(tmp);
+        <span class="keyword">long</span> start = System.currentTimeMillis();
+        <span class="keyword">while</span> (length -- &gt; <span class="number">0</span>) {
+            output.write(b);
+        }
+        System.out.println(<span class="string">"写入时间:"</span> + (System.currentTimeMillis() - start) + <span class="string">"ms"</span>);
+    } <span class="keyword">catch</span> (IOException e) {
+        e.printStackTrace();
+    } <span class="keyword">finally</span> {
+        <span class="keyword">if</span>(output != <span class="keyword">null</span>) {
+            <span class="keyword">try</span> {
+                output.close();
+            } <span class="keyword">catch</span> (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+</code></pre>
+<p>单字节的写入非常耗时,上面代码最终耗时<code>3828580ms</code>，<code>FileOutputStream.write(int)</code>调用<code>native method write(int)</code>。<code>...\jdk\src\share\native\java\io\io_util.c</code>中提供两个方法<code>writeSingle</code>和<code>writeBytes</code>,二者最终调用系统的<code>write</code>方法。</p>
+<pre><code class="c++"><span class="comment">/* Write N bytes of BUF to FD.  Return the number written, or -1.</span>
+<span class="comment"></span>
+<span class="comment">   This function is a cancellation point and therefore not marked with</span>
+<span class="comment">   __THROW.  */</span>
+   <span class="comment">//fd:文件描述符,buf:字节内容,n:字节长度</span>
+<span class="function"><span class="keyword">extern</span> ssize_t <span class="title">write</span> <span class="params">(<span class="keyword">int</span> __fd, <span class="keyword">const</span> <span class="keyword">void</span> *__buf, <span class="keyword">size_t</span> __n)</span> __wur</span>;
+</code></pre>
+<p>由于阻塞模型，系统在写入文件时要和内核空间交互，<code>cpu</code>在用户和内核状态来回切换，用户线程不断阻塞，所以非常耗时。可以改造上面的方法，一次写入多个字节，减少系统写入方法的调用（<code>IO次数</code>）。牺牲内存空间来提高效率。</p>
+<pre><code class="java"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">writeAFileByBIO2</span><span class="params">()</span></span>{
+    <span class="keyword">long</span> length = <span class="number">2000</span>;
+    .........
+    <span class="keyword">byte</span>[] byteArr = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span> * <span class="number">1024</span>];
+    <span class="comment">//一次写入1M的内容</span>
+    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1024</span> * <span class="number">1024</span>; i++) {
+        byteArr[i] = <span class="number">1</span>;
+    }
+    <span class="keyword">long</span> start = System.currentTimeMillis();
+    <span class="keyword">while</span> (length -- &gt; <span class="number">0</span>) {
+        output.write(byteArr);
+    }
+    System.out.println(<span class="string">"写入时间:"</span> + (System.currentTimeMillis() - start) + <span class="string">"ms"</span>);
+    ...
+}
+写入时间:<span class="number">10043</span>ms
+</code></pre>
+<p>使用<code>BufferedOutputStream</code>从源码看,其实和第二种方式类似。但时间却差了好几十倍，原因不明，有可能是因为<code>synchronized</code>关键字的原因，参考[<a href="https://stackoverflow.com/questions/49065340/why-fileinputstream-is-much-faster-then-bufferedinputstream-with-the-same-buffer?answertab=oldest#tab-top]。" target="_blank" rel="noopener">https://stackoverflow.com/questions/49065340/why-fileinputstream-is-much-faster-then-bufferedinputstream-with-the-same-buffer?answertab=oldest#tab-top]。</a></p>
+<pre><code class="java"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">writeAFileByBIO3</span><span class="params">()</span></span>{
+    ..........
+    <span class="keyword">long</span> length = <span class="number">2000</span> * <span class="number">1024</span> * <span class="number">1024</span>;
+    <span class="keyword">try</span> {
+        ....
+        output = <span class="keyword">new</span> BufferedOutputStream(<span class="keyword">new</span> FileOutputStream(tmp),<span class="number">1024</span> * <span class="number">1024</span>);
+        <span class="keyword">long</span> start = System.currentTimeMillis();
+        <span class="keyword">while</span> (length -- &gt; <span class="number">0</span>) {
+            output.write(<span class="number">1</span>);
+        }
+        System.out.println(<span class="string">"写入时间:"</span> + (System.currentTimeMillis() - start) + <span class="string">"ms"</span>);
+    } 
+    .......
+}
+写入时间:<span class="number">48568</span>ms
+</code></pre>
+<h3 id="读取刚刚的文件"><a href="#读取刚刚的文件" class="headerlink" title="读取刚刚的文件"></a>读取刚刚的文件</h3><p>单字节读取,跟写入时情况相同，超级慢。</p>
+<pre><code class="java"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">readFromFileByBIO1</span><span class="params">()</span></span>{
+    File tmp = <span class="keyword">new</span> File(<span class="string">"E:\\tmp.dat"</span>);
+    FileInputStream is = <span class="keyword">null</span>;
+    <span class="keyword">try</span> {
+        is = <span class="keyword">new</span> FileInputStream(tmp);
+        <span class="keyword">long</span> start = System.currentTimeMillis();
+        <span class="keyword">while</span> (is.read() &gt; -<span class="number">1</span>) {
+
+        }
+        System.out.println(<span class="string">"读取时间:"</span> + (System.currentTimeMillis() - start) + <span class="string">"ms"</span>);
+    } <span class="keyword">catch</span> (IOException e) {
+        e.printStackTrace();
+    } <span class="keyword">finally</span> {
+        <span class="keyword">if</span>(is != <span class="keyword">null</span>) {
+            <span class="keyword">try</span> {
+                is.close();
+            } <span class="keyword">catch</span> (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+读取时间:<span class="number">2791450</span>ms
+</code></pre>
+<p>一次读取1M,非常快。</p>
+<pre><code class="java"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">readFromFileByBIO1</span><span class="params">()</span></span>{
+    ........
+    <span class="keyword">try</span> {
+        is = <span class="keyword">new</span> FileInputStream(tmp);
+        <span class="keyword">byte</span>[] buf = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span> * <span class="number">1024</span>];
+        <span class="keyword">long</span> start = System.currentTimeMillis();
+        <span class="keyword">while</span> (is.read(buf) &gt; -<span class="number">1</span>) {
+        }
+        System.out.println(<span class="string">"读取时间:"</span> + (System.currentTimeMillis() - start) + <span class="string">"ms"</span>);
+    } 
+    .........
+}
+读取时间:<span class="number">1549</span>ms
+</code></pre>
+<p>同样，使用<code>BufferedInputStream</code>，将<code>size</code>设置为 <code>1024 * 1024</code>，比上一种方法要慢。</p>
+<pre><code class="java"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">readFromFileByBIO1</span><span class="params">()</span></span>{
+    ........
+    <span class="keyword">try</span> {
+        is = <span class="keyword">new</span> BufferedInputStream(<span class="keyword">new</span> FileInputStream(tmp),<span class="number">1024</span> * <span class="number">1024</span>);
+        <span class="keyword">long</span> start = System.currentTimeMillis();
+        <span class="keyword">while</span> (is.read() &gt; -<span class="number">1</span>) {
+        }
+        System.out.println(<span class="string">"读取时间:"</span> + (System.currentTimeMillis() - start) + <span class="string">"ms"</span>);
+    } 
+    .........
+}
+读取时间:<span class="number">51694</span>ms
+</code></pre>
+<h1 id="NIO"><a href="#NIO" class="headerlink" title="NIO"></a>NIO</h1><p><code>Java NIO</code>是<code>java 1.4</code>之后新出的一套<code>IO</code>接口，这里的的新是相对于原有标准的<code>Java IO</code>和<code>Java Networking</code>接口。NIO提供了一种完全不同的操作方式。<code>NIO</code>中的N可以理解为<code>Non-blocking</code>，不单纯是<code>New</code>。</p>
+<h2 id="NIO与标准IO的区别。"><a href="#NIO与标准IO的区别。" class="headerlink" title="NIO与标准IO的区别。"></a>NIO与标准IO的区别。</h2><ul>
+<li>标准的<code>IO</code>编程接口是面向字节流和字符流的。而<code>NIO</code>是面向通道和缓冲区的，数据总是从通道中读到<code>buffer缓冲区</code>内，或者从<code>buffer</code>写入到通道中。<br><img src="overview-channels-buffers.png" alt="面向通道和缓冲区"></li>
+<li><code>Java NIO</code>使我们可以进行非阻塞<code>IO</code>操作(五大<code>IO</code>模型中的非阻塞模型)。比如说，单线程中从通道读取数据到<code>buffer</code>，同时可以继续做别的事情，当数据读取到<code>buffer</code>中后，线程再继续处理数据。写数据也是一样的。</li>
+<li><code>Java NIO</code>的<code>Selector</code>允许一个单独的线程来监视多个输入通道，你可以注册多个通道使用一个选择器，然后使用一个单独的线程来“选择”通道：这些通道里已经有可以处理的输入，或者选择已准备写入的通道。这种选择机制，使得一个单独的线程很容易来管理多个通道。<br><img src="overview-selectors.png" alt="Selector"></li>
+</ul>
+<h2 id="Buffer缓冲区"><a href="#Buffer缓冲区" class="headerlink" title="Buffer缓冲区"></a>Buffer缓冲区</h2><p><code>buffer</code>缓冲区实质上就是一块内存，用于写入数据，也供后续再次读取数据。这块内存被<code>NIO Buffer</code>管理，并提供一系列的方法用于更简单的操作这块内存。</p>
+<h3 id="Buffer的容量，位置，上限"><a href="#Buffer的容量，位置，上限" class="headerlink" title="Buffer的容量，位置，上限"></a>Buffer的容量，位置，上限</h3><p><img src="buffers-modes.png" alt="Buffer"></p>
+<ul>
+<li>容量：作为一块内存，<code>buffer</code>有一个固定的大小，叫做<code>capacity</code>容量。也就是最多只能写入容量值得字节，整形等数据。一旦<code>buffer</code>写满了就需要清空已读数据以便下次继续写入新的数据。</li>
+<li>位置：当写入数据到<code>Buffer</code>的时候需要中一个确定的位置开始，默认初始化时这个位置<code>position</code>为<code>0</code>，一旦写入了数据比如一个字节，整形数据，那么<code>position</code>的值就会指向数据之后的一个单元，<code>position</code>最大可以到<code>capacity-1</code>。当从<code>Buffer</code>读取数据时，也需要从一个确定的位置开始。<code>buffer</code>从写入模式变为读取模式时，<code>position</code>会归零，每次读取后，<code>position</code>向后移动。</li>
+<li>上限：在写模式，<code>limit</code>的含义是我们所能写入的最大数据量。它等同于<code>buffer</code>的容量。一旦切换到读模式，<code>limit</code>则代表我们所能读取的最大数据量，他的值等同于写模式下<code>position</code>的位置。</li>
+</ul>
+<p><code>NIO</code>还有许多概念，像“零拷贝”、<code>Scatter / Gather</code>等。相关的解释参考<a href="http://wiki.jikexueyuan.com/project/java-nio-zh/java-nio-scatter-gather.html" target="_blank" rel="noopener">即可学院</a>。这里以磁盘<code>IO</code>的方式比较标准<code>IO</code>与<code>NIO</code>的差别。</p>
+<h2 id="样例-1"><a href="#样例-1" class="headerlink" title="样例"></a>样例</h2><h3 id="向文件中写入2000M的内容-1"><a href="#向文件中写入2000M的内容-1" class="headerlink" title="向文件中写入2000M的内容"></a>向文件中写入2000M的内容</h3><pre><code class="java"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">writeAFileByNIO</span><span class="params">()</span></span>{
+    File tmp = <span class="keyword">new</span> File(<span class="string">"E:\\tmp.dat"</span>);
+    FileChannel inChannel = <span class="keyword">null</span>;
+    <span class="keyword">try</span> {
+        <span class="keyword">if</span> (!tmp.exists()) {
+            tmp.createNewFile();
+        }
+        RandomAccessFile aFile = <span class="keyword">new</span> RandomAccessFile(tmp, <span class="string">"rw"</span>);
+        inChannel = aFile.getChannel();
+        <span class="comment">//创建一个ByteBuffer，默认是写模式</span>
+        ByteBuffer buf = ByteBuffer.allocate(<span class="number">1024</span> * <span class="number">1024</span>);
+        <span class="comment">//将buffer的position设为0，limit设为capacity</span>
+        buf.clear();
+        <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; <span class="number">1024</span> * <span class="number">1024</span>; j++) {
+            buf.put((<span class="keyword">byte</span>) <span class="number">1</span>);
+        }
+        <span class="comment">//转换为读模式将limit设为原来的position，position设为0.</span>
+        buf.flip();
+        buf.mark();
+        <span class="keyword">long</span> start = System.currentTimeMillis();
+        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">2000</span> ; i ++) {
+            buf.reset();
+            <span class="keyword">while</span> (buf.hasRemaining()) {
+                inChannel.write(buf);
+            }
+        }
+        System.out.println(<span class="string">"写入时间:"</span> + (System.currentTimeMillis() - start) + <span class="string">"ms"</span>);
+    } <span class="keyword">catch</span> (IOException e) {
+        e.printStackTrace();
+    } <span class="keyword">finally</span> {
+        <span class="keyword">if</span>(inChannel != <span class="keyword">null</span>) {
+            <span class="keyword">try</span> {
+                inChannel.close();
+            } <span class="keyword">catch</span> (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+写入时间:<span class="number">9918</span>ms
+</code></pre>
+<h3 id="读取刚刚的文件-1"><a href="#读取刚刚的文件-1" class="headerlink" title="读取刚刚的文件"></a>读取刚刚的文件</h3><pre><code class="java"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">readFromFileByNIO</span><span class="params">()</span></span>{
+    FileChannel inChannel = <span class="keyword">null</span>;
+    <span class="keyword">try</span> {
+        RandomAccessFile aFile = <span class="keyword">new</span> RandomAccessFile(<span class="string">"E:\\tmp.dat"</span>, <span class="string">"r"</span>);
+        inChannel = aFile.getChannel();
+        ByteBuffer buf = ByteBuffer.allocate(<span class="number">1024</span> * <span class="number">1024</span>);
+        <span class="keyword">long</span> start = System.currentTimeMillis();
+        <span class="keyword">while</span> (inChannel.read(buf) &gt; -<span class="number">1</span>) {
+            buf.clear();
+        }
+        System.out.println(<span class="string">"读取时间:"</span> + (System.currentTimeMillis() - start) + <span class="string">"ms"</span>);
+    } <span class="keyword">catch</span> (IOException e) {
+        e.printStackTrace();
+    } <span class="keyword">finally</span> {
+        <span class="comment">//close code</span>
+    }
+}
+读取时间:<span class="number">1041</span>ms
+</code></pre>
+<p>对于文件的读写，<code>NIO</code>和<code>BIO</code>同样都调用了系统底层的<code>read</code>和<code>write</code>方法，相同的<code>IO</code>次数的情况下，两者的效率差别不是很大，<code>NIO</code>效率较高。<code>NIO</code>只是改变了<code>IO</code>的方式，提供了更加灵活的<code>API</code>，让IO成为非阻塞的模式，在<code>IO</code>阻塞的时候程序可以做其他事情，<code>NIO</code>在网络<code>IO</code>的情况下才会发挥它明显的优势。</p>
+<h1 id="AIO"><a href="#AIO" class="headerlink" title="AIO"></a>AIO</h1><p><code>jdk7</code>中新增了一些与文件(网络)<code>I/O</code>相关的一些<code>api</code>。这些<code>API</code>被称为<code>NIO.2</code>，或称为<code>AIO(Asynchronous I/O)</code>。<code>AIO</code>最大的一个特性就是异步能力，这种能力对<code>socket</code>与文件<code>I/O</code>都起作用。<code>AIO</code>其实是一种在读写操作结束之前允许进行其他操作的<code>I/O</code>处理。<code>AIO</code>是对<code>JDK1.4</code>中提出的同步非阻塞<code>I/O(NIO)</code>的进一步增强。<code>Java AIO</code>是五大模型中异步模型的实现。</p>
+<h2 id="异步编程"><a href="#异步编程" class="headerlink" title="异步编程"></a>异步编程</h2><p>异步编程提供了一个非阻塞的，事件驱动的编程模型。 这种编程模型利用系统中多核执行任务来提供并行，因此提高了应用的吞吐率。就单线程的编程而言，异步并没有提高程序的运行效率，反而增加了程序的复杂度。<code>Java</code>异步编程通常需要使用<code>Future</code>，<code>FutureTask</code>和<code>Callable</code>，其中<code>Future</code>代表未来的某个结果，一般是向线程池提交任务时返回。</p>
+<h3 id="Future"><a href="#Future" class="headerlink" title="Future"></a>Future</h3><pre><code class="java"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">TestFuture</span><span class="params">()</span> <span class="keyword">throws</span> ExecutionException, InterruptedException </span>{
+    ExecutorService executor = Executors.newFixedThreadPool(<span class="number">3</span>);
+    List&lt;Future&lt;String&gt;&gt; futureList = <span class="keyword">new</span> ArrayList&lt;&gt;();
+    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">3</span>; i++) {
+        <span class="keyword">final</span> <span class="keyword">int</span> finalI = i;
+        Future&lt;String&gt; future = executor.submit(() -&gt; {
+            System.out.println(<span class="string">"task["</span>+ finalI +<span class="string">"] started!"</span>);
+            Thread.sleep(<span class="number">1000</span>*(<span class="number">3</span>-finalI));<span class="comment">// cost some time</span>
+            System.out.println(<span class="string">"task["</span>+ finalI +<span class="string">"]finished!"</span>);
+            <span class="keyword">return</span> <span class="string">"result["</span>+ finalI +<span class="string">"]"</span>;
+        });
+        futureList.add(future);
+    }
+
+    <span class="keyword">for</span> (Future&lt;String&gt; future : futureList) {
+        System.out.println(future.get());
+    }
+    System.out.println(<span class="string">"Main thread finished."</span>);
+    executor.shutdown();
+}
+<span class="comment">//执行结果</span>
+task[<span class="number">0</span>] started!
+task[<span class="number">1</span>] started!
+task[<span class="number">2</span>] started!
+task[<span class="number">2</span>]finished!
+task[<span class="number">1</span>]finished!
+task[<span class="number">0</span>]finished!
+result[<span class="number">0</span>]
+result[<span class="number">1</span>]
+result[<span class="number">2</span>]
+Main thread finished.
+</code></pre>
+<p>主线程向线程池提交的三个任务同时开始执行，但是在使用<code>get</code>取结果的时候发现必须等耗时最长的任务结束之后才可以得到执行结果。也就是三个线程都结束后才返回主线程。<code>get</code>方法阻塞了主线程，在取异步任务执行结果期间主线程不可以做其他事情，这不是真正的异步执行。但这个适合分开统计，合并汇总的场景。<br><img src="Future.png" alt="Future"></p>
+<h3 id="CompletionService"><a href="#CompletionService" class="headerlink" title="CompletionService"></a>CompletionService</h3><pre><code class="java"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">TestCompletionService</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException, ExecutionException </span>{
+    ExecutorService executor = Executors.newFixedThreadPool(<span class="number">3</span>);
+    CompletionService&lt;String&gt; service = <span class="keyword">new</span> ExecutorCompletionService&lt;String&gt;(executor);
+    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">3</span>; i++) {
+        <span class="keyword">int</span> finalI = i;
+        service.submit(() -&gt; {
+            System.out.println(<span class="string">"task["</span>+ finalI +<span class="string">"] started!"</span>);
+            Thread.sleep(<span class="number">1000</span>*(<span class="number">3</span>-finalI));<span class="comment">// cost some time</span>
+            System.out.println(<span class="string">"task["</span>+ finalI +<span class="string">"]finished!"</span>);
+            <span class="keyword">return</span> <span class="string">"result["</span>+ finalI +<span class="string">"]"</span>;
+        });
+    }
+    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">3</span>; i++) {
+        System.out.println(service.take().get());
+    }
+    System.out.println(<span class="string">"Main thread finished."</span>);
+    executor.shutdown();
+}
+<span class="comment">//执行结果</span>
+task[<span class="number">1</span>] started!
+task[<span class="number">0</span>] started!
+task[<span class="number">2</span>] started!
+task[<span class="number">2</span>]finished!
+result[<span class="number">2</span>]
+task[<span class="number">1</span>]finished!
+result[<span class="number">1</span>]
+task[<span class="number">0</span>]finished!
+result[<span class="number">0</span>]
+Main thread finished.
+</code></pre>
+<p>主线程向线程池提交的三个任务同时开始执行，与<code>Future</code>不同的是三个线程完成后分别返回主线程进行处理。<code>service.take().get()</code>也会阻塞主线程。<br><img src="FutureTask.png" alt="FutureTask"></p>
+<h3 id="CompletableFuture"><a href="#CompletableFuture" class="headerlink" title="CompletableFuture"></a>CompletableFuture</h3><pre><code class="java"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">testCompletableFuture</span><span class="params">()</span></span>{
+    ExecutorService executor = Executors.newFixedThreadPool(<span class="number">3</span>);
+    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">3</span>; i++) {
+        <span class="keyword">int</span> finalI = i;
+        CompletableFuture&lt;String&gt; future = CompletableFuture.supplyAsync(() -&gt; {
+            System.out.println(<span class="string">"task["</span>+finalI+<span class="string">"] started!"</span>);
+            <span class="keyword">try</span> {
+                <span class="comment">// time cost</span>
+                Thread.sleep(<span class="number">1000</span>*(<span class="number">3</span>-finalI));
+            } <span class="keyword">catch</span> (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(<span class="string">"task["</span>+finalI+<span class="string">"] finished"</span>);
+            <span class="keyword">return</span> <span class="string">"result["</span>+finalI+<span class="string">"]"</span>;
+        }, executor);
+        future.thenAccept(System.out::println);
+    }
+
+    System.out.println(<span class="string">"Main thread finished."</span>);
+    executor.shutdown();
+}
+<span class="comment">//执行结果</span>
+Main thread finished.
+task[<span class="number">0</span>] started!
+task[<span class="number">1</span>] started!
+task[<span class="number">2</span>] started!
+task[<span class="number">2</span>] finished
+result[<span class="number">2</span>]
+task[<span class="number">1</span>] finished
+result[<span class="number">1</span>]
+task[<span class="number">0</span>] finished
+result[<span class="number">0</span>]
+</code></pre>
+<p>主线程向线程池提交的三个任务同时开始执行，主线程只负责提交任务，任务提交完后就可以做其他事情了，主线程提交任务时给了任务回调函数，任务执行完成后调用这个函数就行了。这才是真正的异步。<br><img src="CompletableFuture.png" alt="CompletableFuture"></p>
+<h2 id="文件的异步读写"><a href="#文件的异步读写" class="headerlink" title="文件的异步读写"></a>文件的异步读写</h2><p>在同步<code>IO</code>中，线程会阻塞直到系统的<code>IO</code>操作完成之后再获取操作结果。在异步<code>IO</code>中，线程只是提交读写操作请求，等到系统<code>IO</code>操作完成后会操作结果通知到线程。可以看出，<code>AIO</code>并没有加速<code>IO</code>处理速度，只是利用回调和通知机制改变了业务处理时机，使得具体逻辑可以不关注<code>IO</code>结果，只需在合理的时机添加回调即可。<br><code>java.nio.channels.AsynchronousFileChannel</code>类是<code>java</code>提供的异步文件通道。通过静态方法<code>AsynchronousFileChannel#open()</code>能获取实例。<code>AsynchronousFileChannel</code>类提供了两种方式去处理系统<code>IO</code>操作的结果。</p>
+<ul>
+<li>使用<code>java.util.concurrent.Future</code>对象。</li>
+<li>使用<code>java.nio.channels.CompletionHandler</code> 对象。</li>
+</ul>
+<h3 id="使用Future对象写入一个2000M的文件"><a href="#使用Future对象写入一个2000M的文件" class="headerlink" title="使用Future对象写入一个2000M的文件"></a>使用Future对象写入一个2000M的文件</h3><pre><code class="java"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">writeAFileByAIO2</span><span class="params">()</span></span>{
+    Path path = Paths.get(<span class="string">"E:\\tmp.dat"</span>);
+    AsynchronousFileChannel afc = <span class="keyword">null</span>;
+    <span class="keyword">try</span> {
+        afc   = AsynchronousFileChannel.open(path, WRITE, CREATE);
+        List&lt;Future&lt;Integer&gt;&gt; results = <span class="keyword">new</span> ArrayList&lt;&gt;();
+        ByteBuffer buf = ByteBuffer.allocate(<span class="number">1024</span> * <span class="number">1024</span>);
+        buf.clear();
+        <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; <span class="number">1024</span> * <span class="number">1024</span>; j++) {
+            buf.put((<span class="keyword">byte</span>) <span class="number">1</span>);
+        }
+        buf.flip();
+        buf.mark();
+        <span class="keyword">long</span> start = System.currentTimeMillis();
+        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">2000</span>; i ++) {
+            buf.reset();
+            results.add(afc.write(buf, i * <span class="number">1024</span> *<span class="number">1024</span>));
+        }
+        <span class="keyword">for</span>(Future&lt;Integer&gt; future : results) {
+            future.get();
+        }
+        System.out.println(<span class="string">"写入时间:"</span> + (System.currentTimeMillis() - start) + <span class="string">"ms"</span>);
+    } <span class="keyword">catch</span> (IOException e) {
+        e.printStackTrace();
+    } <span class="keyword">catch</span> (InterruptedException e) {
+        e.printStackTrace();
+    } <span class="keyword">catch</span> (ExecutionException e) {
+        e.printStackTrace();
+    } <span class="keyword">finally</span> {
+        <span class="keyword">if</span>(afc != <span class="keyword">null</span>) {
+            <span class="keyword">try</span> {
+                afc.close();
+            } <span class="keyword">catch</span> (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+写入时间:<span class="number">19732</span>ms
+</code></pre>
+<h3 id="使用CompletionHandler对象写入一个2000M的文件"><a href="#使用CompletionHandler对象写入一个2000M的文件" class="headerlink" title="使用CompletionHandler对象写入一个2000M的文件"></a>使用CompletionHandler对象写入一个2000M的文件</h3><p><code>Attachment</code>类，附带异步读写时，主线程的一些变量。</p>
+<pre><code class="java"><span class="class"><span class="keyword">class</span> <span class="title">Attachment</span> </span>{
+    <span class="keyword">public</span> Path  path;
+    <span class="keyword">public</span> ByteBuffer buffer;
+    <span class="keyword">public</span> AsynchronousFileChannel asyncChannel;
+    <span class="keyword">public</span> <span class="keyword">int</span> count = <span class="number">0</span>;
+
+    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">close</span><span class="params">()</span></span>{
+        System.out.println(count);
+        <span class="keyword">if</span>(++ count &gt;= <span class="number">2000</span>) {
+            <span class="keyword">try</span> {
+                <span class="keyword">this</span>.asyncChannel.close();
+            } <span class="keyword">catch</span> (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+</code></pre>
+<pre><code class="java"><span class="class"><span class="keyword">class</span> <span class="title">WriteHandler</span> <span class="keyword">implements</span> <span class="title">CompletionHandler</span>&lt;<span class="title">Integer</span>, <span class="title">Attachment</span>&gt; </span>{
+    <span class="meta">@Override</span>
+    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">completed</span><span class="params">(Integer result, Attachment attachment)</span> </span>{
+        System.out.format(<span class="string">"%s bytes written  to  %s%n"</span>, result,
+                attachment.path.toAbsolutePath());
+        attachment.close();
+    }
+
+    <span class="meta">@Override</span>
+    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">failed</span><span class="params">(Throwable exc, Attachment attachment)</span> </span>{
+        System.out.println(exc.getMessage());
+        attachment.close();
+    }
+}
+</code></pre>
+<pre><code class="java"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">writeAFileByAIO3</span><span class="params">()</span></span>{
+    Path path = Paths.get(<span class="string">"E:\\tmp.dat"</span>);
+    AsynchronousFileChannel afc = <span class="keyword">null</span>;
+    <span class="keyword">try</span> {
+        afc   = AsynchronousFileChannel.open(path, WRITE, CREATE);
+        ByteBuffer buf = ByteBuffer.allocate(<span class="number">1024</span> * <span class="number">1024</span>);
+        buf.clear();
+        <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; <span class="number">1024</span> * <span class="number">1024</span>; j++) {
+            buf.put((<span class="keyword">byte</span>) <span class="number">1</span>);
+        }
+        buf.flip();
+        buf.mark();
+        Attachment attach  = <span class="keyword">new</span> Attachment();
+        attach.asyncChannel = afc;
+        attach.buffer = buf;
+        attach.path = path;
+        WriteHandler handler = <span class="keyword">new</span> WriteHandler();
+        <span class="keyword">long</span> start = System.currentTimeMillis();
+        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">2000</span>; i ++) {
+            buf.reset();
+            afc.write(buf, i * <span class="number">1024</span> * <span class="number">1024</span>, attach, handler);
+        }
+        System.out.println(<span class="string">"写入时间:"</span> + (System.currentTimeMillis() - start) + <span class="string">"ms"</span>);
+    } <span class="keyword">catch</span> (IOException e) {
+        e.printStackTrace();
+    } <span class="keyword">finally</span> {
+        <span class="keyword">if</span>(afc != <span class="keyword">null</span>) {
+            <span class="keyword">try</span> {
+                afc.close();
+            } <span class="keyword">catch</span> (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+</code></pre>
+<p>上面代码可以看出，<code>CompletionHandler</code>方式如果在每次读取完成之后直接关闭<code>channel</code>，这会导致其他线程写入失败，所以这种操作需要做一些处理后才能关闭。<br>不管是<code>CompletionHandler</code>还是<code>Future</code>方式，到最后都会调用<code>sun.nio.ch.WindowsAsynchronousFileChannelImpl.WriteTask#run()</code>方法，该方法调用本地方法<code>openjdk\jdk\src\windows\native\sun\nio\ch\WindowsAsynchronousFileChannelImpl.c#Java_sun_nio_ch_WindowsAsynchronousFileChannelImpl_writeFile</code>,最后调用<code>windows</code>底层的<code>writeFile</code>函数。</p>
+<pre><code class="java"><span class="comment">//组长overlapped数据结构，返回地址</span>
+overlapped = ioCache.add(result);
+<span class="comment">// 调用windows底层的writeFile函数</span>
+n = writeFile(handle, address, rem, position, overlapped);
+<span class="comment">//返回状态说明是异步执行</span>
+<span class="keyword">if</span> (n == IOStatus.UNAVAILABLE) {
+    <span class="comment">// I/O is pending</span>
+    <span class="keyword">return</span>;
+} <span class="keyword">else</span> {
+    <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(<span class="string">"Unexpected result: "</span> + n);
+}
+</code></pre>
+<pre><code class="c++">JNIEXPORT jint JNICALL
+Java_sun_nio_ch_WindowsAsynchronousFileChannelImpl_writeFile(JNIEnv* env, jclass <span class="keyword">this</span>,
+    jlong handle, jlong address, jint len, jlong offset, jlong ov)
+{
+    BOOL res;
+
+    OVERLAPPED* lpOverlapped = (OVERLAPPED*)jlong_to_ptr(ov);
+    lpOverlapped-&gt;Offset = (DWORD)offset;
+    lpOverlapped-&gt;OffsetHigh = (DWORD)((<span class="keyword">long</span>)(offset &gt;&gt; <span class="number">32</span>));
+    lpOverlapped-&gt;hEvent = <span class="literal">NULL</span>;
+
+    res = WriteFile((HANDLE)jlong_to_ptr(handle),
+                   (LPVOID) jlong_to_ptr(address),
+                   (DWORD)len,
+                   <span class="literal">NULL</span>,
+                   lpOverlapped);
+
+    <span class="keyword">if</span> (res == <span class="number">0</span>) {
+        <span class="keyword">int</span> error = GetLastError();
+        <span class="keyword">if</span> (error == ERROR_IO_PENDING)
+            <span class="keyword">return</span> IOS_UNAVAILABLE;
+        JNU_ThrowIOExceptionWithLastError(env, <span class="string">"WriteFile failed"</span>);
+        <span class="keyword">return</span> IOS_THROWN;
+    }
+
+    <span class="keyword">return</span> IOS_UNAVAILABLE;
+}
+</code></pre>
+<p><code>windows</code>底层的<code>writeFile</code>函数详解请参考<a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa365747%28v=vs.85%29.aspx?f=255&amp;MSPPError=-2147217396" target="_blank" rel="noopener">WriteFile function</a>,该函数最后一个参数<code>lpOverlapped</code>是异步实现的一个重要数据结构，该函数详解请参考<a href="http://blog.csdn.net/tgxallen/article/details/77428539" target="_blank" rel="noopener">windows IOCP完成端口原理详解
+</a>。</p>
+<h3 id="异步读文件"><a href="#异步读文件" class="headerlink" title="异步读文件"></a>异步读文件</h3><p>参考<a href="http://www.java2s.com/Tutorials/Java/Java_io/1050__Java_nio_Asynchronous.htm" target="_blank" rel="noopener">Java IO Tutorial - Java Asynchronous I/O</a></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ul>
+<li>减少<code>IO</code>发生的次数可以提高文件读写的效率。具体操作是一次读取/写入多个字节。</li>
+<li>在相同缓存大小的情况下<code>read(byte[])</code>比<code>BufferedInputStream</code>效率要高，虽然从源码上看二者产不多，但实际上<code>read(byte[])</code>要快很多，具体原因可能与<code>synchronized</code>关键字有关。</li>
+<li><code>NIO</code>的文件读写效率比<code>read(byte[])</code>差不多，二者都是调用底层的<code>write</code>函数，但<code>NIO</code>提供了比较方便的API。</li>
+<li><code>AIO</code>并没有加速<code>IO</code>处理速度，只是利用回调和通知机制改变了业务处理时机，使得具体逻辑可以不关注<code>IO</code>结果，只需在合理的时机添加回调即可。但是多线程的文件读写并没有比同步的读写快，原因不清楚。<code>windows</code>系统的异步<code>IO</code>是通过<code>IOCP</code>完成的。</li>
+</ul>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><ul>
+<li><code>read(byte[])</code>比<code>BufferedInputStream</code>效率高具体是什么原因导致的。</li>
+<li>多线程的文件读写并没有比同步的读写快，为什么？</li>
+<li><code>windows</code>系统的<code>IOCP</code>是如何管理线程的，又是怎样通知怎样回调的？</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/java/" rel="tag"># java</a>
+          
+            <a href="/tags/I-O/" rel="tag"># I/O</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/07/五大IO模型/" rel="next" title="五大IO模型">
+                <i class="fa fa-chevron-left"></i> 五大IO模型
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div onclick="showGitment()" id="gitment-display-button">显示 Gitment 评论</div>
+        <div id="gitment-container" style="display:none"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/gougou.jpg"
+                alt="鸡哥" />
+            
+              <p class="site-author-name" itemprop="name">鸡哥</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/jiges" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i></a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:ccr12312@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i></a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#传统IO-BIO"><span class="nav-number">1.</span> <span class="nav-text">传统IO-BIO</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#IO流处理类"><span class="nav-number">1.1.</span> <span class="nav-text">IO流处理类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IO流处理类分类"><span class="nav-number">1.2.</span> <span class="nav-text">IO流处理类分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#样例"><span class="nav-number">1.3.</span> <span class="nav-text">样例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#向文件中写入2000M的内容"><span class="nav-number">1.3.1.</span> <span class="nav-text">向文件中写入2000M的内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#读取刚刚的文件"><span class="nav-number">1.3.2.</span> <span class="nav-text">读取刚刚的文件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#NIO"><span class="nav-number">2.</span> <span class="nav-text">NIO</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NIO与标准IO的区别。"><span class="nav-number">2.1.</span> <span class="nav-text">NIO与标准IO的区别。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Buffer缓冲区"><span class="nav-number">2.2.</span> <span class="nav-text">Buffer缓冲区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Buffer的容量，位置，上限"><span class="nav-number">2.2.1.</span> <span class="nav-text">Buffer的容量，位置，上限</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#样例-1"><span class="nav-number">2.3.</span> <span class="nav-text">样例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#向文件中写入2000M的内容-1"><span class="nav-number">2.3.1.</span> <span class="nav-text">向文件中写入2000M的内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#读取刚刚的文件-1"><span class="nav-number">2.3.2.</span> <span class="nav-text">读取刚刚的文件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AIO"><span class="nav-number">3.</span> <span class="nav-text">AIO</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#异步编程"><span class="nav-number">3.1.</span> <span class="nav-text">异步编程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Future"><span class="nav-number">3.1.1.</span> <span class="nav-text">Future</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CompletionService"><span class="nav-number">3.1.2.</span> <span class="nav-text">CompletionService</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CompletableFuture"><span class="nav-number">3.1.3.</span> <span class="nav-text">CompletableFuture</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文件的异步读写"><span class="nav-number">3.2.</span> <span class="nav-text">文件的异步读写</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用Future对象写入一个2000M的文件"><span class="nav-number">3.2.1.</span> <span class="nav-text">使用Future对象写入一个2000M的文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用CompletionHandler对象写入一个2000M的文件"><span class="nav-number">3.2.2.</span> <span class="nav-text">使用CompletionHandler对象写入一个2000M的文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#异步读文件"><span class="nav-number">3.2.3.</span> <span class="nav-text">异步读文件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#问题"><span class="nav-number">5.</span> <span class="nav-text">问题</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">鸡哥</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'jiges',
+            repo: 'jiges.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '3bfafe08bfcef158878f09910c6a9f2aef7391de',
+            
+                client_id: 'c41b93a72f2b21dcc1ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      function showGitment(){
+        document.getElementById("gitment-display-button").style.display = "none";
+        document.getElementById("gitment-container").style.display = "block";
+        renderGitment();
+      }
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("paa9xqTl09B7K7pJzx3tI8A7-gzGzoHsz", "Tt2YuM3CWPcI5gNeGiQR9qeh");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OpenJDK,Netbeans," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="NetBeans远程开发在开发linux下的C/C++程序的时候，不可避免的会遇到在windows下进行开发，而在linux上编译和调试的场景。常见的解决方式是在windows上安装一个linux虚拟机，然后在Linux上编写代码，编译和调试。如果虚拟机不装图形界面会导致开发效率低，而如果安装了图形界面又会大量的占用系">
+<meta name="keywords" content="OpenJDK,Netbeans">
+<meta property="og:type" content="article">
+<meta property="og:title" content="win10利用Netbeans远程构建调试OpenJDK">
+<meta property="og:url" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/index.html">
+<meta property="og:site_name" content="鸡哥の博客">
+<meta property="og:description" content="NetBeans远程开发在开发linux下的C/C++程序的时候，不可避免的会遇到在windows下进行开发，而在linux上编译和调试的场景。常见的解决方式是在windows上安装一个linux虚拟机，然后在Linux上编写代码，编译和调试。如果虚拟机不装图形界面会导致开发效率低，而如果安装了图形界面又会大量的占用系统资源。安装无界面的linux虚拟机，同时使用NetBeans的远程开发功能在w">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-cf63f9d61aff491c.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-949599abc82796ee.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-34c85d83d29b3642.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-49695fd38841bd8c.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-f66ab57efafab79e.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-a2b772bd714d673f.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-0df8893f2ea2b223.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-b5b4b9bbc0ef5f7e.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-79cfd9a78d692fe5.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-4e0b8dd48584c661.png">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3433091-c0d5b0f94e934ff9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/620">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-e4c0fa4fcda389b6.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-26cea2b1b64425d5.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-c6a24ce48352da6a.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-01f33f5c624cb110.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-214d6e2b941518d0.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-f64aac29218fb0d5.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-6fdd756df1f4f842.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-b161f3c3a41bca4a.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-ac9205fd316af1ed.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-4960ac9fcea91965.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-5ef1ad52e670fc56.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-2152e47cb6e14e17.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-2b90dbc679214b9f.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-125985cd43b66e47.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-5148f13e2c1de5a2.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-de8b30d01ef478e5.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-8573cd61828ff74c.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-ba558ae92a1e7273.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-b24ad588d9cef967.png">
+<meta property="og:updated_time" content="2017-11-24T01:40:56.570Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="win10利用Netbeans远程构建调试OpenJDK">
+<meta name="twitter:description" content="NetBeans远程开发在开发linux下的C/C++程序的时候，不可避免的会遇到在windows下进行开发，而在linux上编译和调试的场景。常见的解决方式是在windows上安装一个linux虚拟机，然后在Linux上编写代码，编译和调试。如果虚拟机不装图形界面会导致开发效率低，而如果安装了图形界面又会大量的占用系统资源。安装无界面的linux虚拟机，同时使用NetBeans的远程开发功能在w">
+<meta name="twitter:image" content="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/3433091-cf63f9d61aff491c.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/"/>
+
+
+
+
+
+  <title>win10利用Netbeans远程构建调试OpenJDK | 鸡哥の博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">鸡哥の博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/index.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="鸡哥">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/gougou.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鸡哥の博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">win10利用Netbeans远程构建调试OpenJDK</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-10T08:25:31+08:00">
+                2017-11-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OpenJDK/" itemprop="url" rel="index">
+                    <span itemprop="name">OpenJDK</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/" class="leancloud_visitors" data-flag-title="win10利用Netbeans远程构建调试OpenJDK">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="NetBeans远程开发"><a href="#NetBeans远程开发" class="headerlink" title="NetBeans远程开发"></a>NetBeans远程开发</h1><p>在开发<code>linux</code>下的<code>C/C++</code>程序的时候，不可避免的会遇到在<code>windows</code>下进行开发，而在<code>linux</code>上编译和调试的场景。常见的解决方式是在<code>windows</code>上安装一个<code>linux</code>虚拟机，然后在<code>Linux</code>上编写代码，编译和调试。如果虚拟机不装图形界面会导致开发效率低，而如果安装了图形界面又会大量的占用系统资源。安装无界面的<code>linux</code>虚拟机，同时使用<code>NetBeans</code>的远程开发功能在<code>windows</code>下进行开发，可以很好的解决这个问题。<br>需要了解<code>NetBeans</code>远程开发请参考：<a href="https://netbeans.org/kb/docs/cnd/remotedev-tutorial_zh_CN.html" target="_blank" rel="noopener">https://netbeans.org/kb/docs/cnd/remotedev-tutorial_zh_CN.html</a><br>众所周知，在<code>windows</code>上编译及调试<code>openJDK</code>极为复杂，会遇到各种各样的问题，而且网络上的教程很少且大部分是以前的版本。而在<code>Linux</code>上编译调试<code>OpenJDK</code>相对简单的多。利用这一点，读者可在<code>windows</code>上安装<code>NetBeans</code>，利用其远程开发的功能，实现在<code>windows</code>上使用<code>Linux</code>环境对<code>OpenJdk</code>进行调试。<br> <a id="more"></a></p>
+<h1 id="准备Linux环境编译openJDK"><a href="#准备Linux环境编译openJDK" class="headerlink" title="准备Linux环境编译openJDK"></a>准备<code>Linux</code>环境编译<code>openJDK</code></h1><p>既然是使用<code>Linux</code>环境，那<code>Linux</code>环境自然需要配置成能对<code>OpenJdk</code>进行编译。<code>Linux</code>环境编译<code>OpenJDK</code>网上已经有很多教程，在此只是简单的说下步骤</p>
+<h2 id="准备Linux环境。"><a href="#准备Linux环境。" class="headerlink" title="准备Linux环境。"></a>准备<code>Linux</code>环境。</h2><p>我选择<code>Ubuntu17</code>版本在<code>VirtualBox</code>上安装，<code>make</code>版本原本是<code>4.1</code>版本，<code>gcc</code>和<code>g++</code>版本是<code>6.3.0</code>，但在编译过程中出现一些问题，后来将版本降至<code>4.7</code>，为了能实现远程调试，环境必须有<code>GDB</code>。<code>bootjdk</code> jdk7版本。</p>
+<pre><code class="c">$ make -v 
+GNU Make <span class="number">4.1</span>
+$ gcc -v
+gcc version <span class="number">4.7</span><span class="number">.4</span>
+$ g++ -v
+gcc version <span class="number">4.7</span><span class="number">.4</span>
+$ gdb -v
+GNU gdb <span class="number">7.12</span><span class="number">.50</span><span class="number">.20170314</span>-git
+</code></pre>
+<h2 id="获取OpenJDK源码。"><a href="#获取OpenJDK源码。" class="headerlink" title="获取OpenJDK源码。"></a>获取OpenJDK源码。</h2><p>这里我选择<code>openjdk-8-src-b132-03_mar_2014.zip</code></p>
+<h2 id="配置config（预构建）"><a href="#配置config（预构建）" class="headerlink" title="配置config（预构建）"></a>配置<code>config</code>（预构建）</h2><pre><code class="c">bash ./configure  --with-debug-level=slowdebug --with-target-bits=<span class="number">64</span> --with-boot-jdk=/home/ccr/jdk1<span class="number">.7</span><span class="number">.0</span>_80
+</code></pre>
+<p>在配置的过程中，会提示环境缺少的各种包，按照提示一次安装即可，在提示安装 <code>libX11-dev</code>依赖时，<code>ubuntu</code>怎么也安装不上，后来发现<code>x</code>大写了，改成小写就行了，配置完成后如下图：<br><img src="3433091-cf63f9d61aff491c.png" alt="配置完成"></p>
+<h2 id="make-all-构建"><a href="#make-all-构建" class="headerlink" title="make all(构建)"></a><code>make all</code>(构建)</h2><p>在构建时有可能遇到以下问题，解决方法也在下面：</p>
+<ul>
+<li><h3 id="This-OS-is-not-supported"><a href="#This-OS-is-not-supported" class="headerlink" title="This OS is not supported:"></a><code>This OS is not supported</code>:</h3>在<code>/openjdk/hotspot/make/linux/Makefile</code>文件的228行，写明了该版本<code>openJDK</code>所支持的<code>OS</code>版本，通过<code>uname -r</code>命令查出系统的版本，添加到228行后面重新编译即可（<code>make clean</code>）。<br><img src="3433091-949599abc82796ee.png" alt="uname-r"></li>
+<li><h3 id="invalid-option-39-39"><a href="#invalid-option-39-39" class="headerlink" title="invalid option -- &#39;/&#39;"></a><code>invalid option -- &#39;/&#39;</code></h3><img src="3433091-34c85d83d29b3642.png" alt="clipboard.png"><br>解决办法：删除66-67行之间的那段<pre><code class="c">$ vim hotspot/make/linux/makefiles/adjust-mflags.sh
+<span class="number">63</span> MFLAGS=`
+<span class="number">64</span>         echo <span class="string">"$MFLAGS"</span> \
+<span class="number">65</span>         | sed '
+<span class="number">66</span>                 s/^-/ -/
+                   s/ -\([^        ][^     ]*\)j/ -\<span class="number">1</span> -j/
+<span class="number">67</span>                 s/ -j[<span class="number">0</span><span class="number">-9</span>][<span class="number">0</span><span class="number">-9</span>]*/ -j/
+<span class="number">68</span>                 s/ -j\([^       ]\)/ -j -\<span class="number">1</span>/
+<span class="number">69</span>                 s/ -j/ -j'${HOTSPOT_BUILD_JOBS:-${default_build_jobs}}<span class="string">'/</span>
+70         ' `
+</code></pre>
+</li>
+<li><h3 id="invalid-suffix-on-literal"><a href="#invalid-suffix-on-literal" class="headerlink" title="invalid suffix on literal"></a><code>invalid suffix on literal</code></h3><img src="3433091-49695fd38841bd8c.png" alt="clipboard.png"><br><img src="3433091-f66ab57efafab79e.png" alt="clipboard.png"><br>这是因为<code>gcc</code>和<code>g++</code>版本过高导致，降低<code>gcc</code>版本至<code>4.7</code>.<pre><code class="c"><span class="comment">//1 安装</span>
+$ sudo apt-get install -y gcc<span class="number">-4.7</span>
+$ sudo apt-get install -y g++<span class="number">-4.7</span>
+<span class="comment">//2 重新建立软连接</span>
+$ cd /usr/bin
+$ sudo rm -r gcc
+$ sudo ln -sf gcc<span class="number">-4.7</span> gcc
+$ sudo rm -r g++
+$ sudo ln -sf g++<span class="number">-4.7</span> g++
+</code></pre>
+</li>
+<li><h3 id="Werror-deprecated-declarations"><a href="#Werror-deprecated-declarations" class="headerlink" title="-Werror=deprecated-declarations"></a><code>-Werror=deprecated-declarations</code></h3><img src="3433091-a2b772bd714d673f.png" alt="clipboard.png"><br>解决办法<pre><code class="c">$ vim hotspot/make/linux/makefiles/gcc.make
+# Compiler warnings are treated as errors
+# WARNINGS_ARE_ERRORS = -Werror #注释这一行
+</code></pre>
+构建完成后出现如下图所示内容，说明构建成功<br><img src="3433091-0df8893f2ea2b223.png" alt="clipboard.png"><h1 id="windows-NetBeans构建调试"><a href="#windows-NetBeans构建调试" class="headerlink" title="windows NetBeans构建调试"></a><code>windows</code> <code>NetBeans</code>构建调试</h1>远程调试一般有两种方式，一种是将本地源码通过<code>sftp</code>的方式复制到目标机器，目标机器进行编译后的结果在复制到本地，这种方式针对小型项目效果还是不错的，但是对<code>OpenJDK</code>这种大型项目，复制无疑是非常耗时的，有时还会出现异常。另一种方式是将<code>windows</code>的文件夹共享至网络中，<code>linux</code>通过<code>mount</code>命令将网络中的文件夹挂在至<code>Linux</code>系统，并且赋予读写和执行权限，这样<code>windows</code>和<code>Linux</code>就能共同操作统一文件夹。毫无疑问本教程使用第二种方式。<h2 id="创建文件夹"><a href="#创建文件夹" class="headerlink" title="创建文件夹"></a>创建文件夹</h2>在D盘新建<code>jvm</code>文件夹（作为共享文件夹），将<code>OpenJDK</code>解压至该文件夹。安装<code>NetBeans</code>（我选择最新版本8.2）。<h2 id="分享文件夹"><a href="#分享文件夹" class="headerlink" title="分享文件夹"></a>分享文件夹</h2>分享<code>jvm</code>文件夹。在<code>windows</code>上操作如下，选择一个账户进行共享，共享结束后，右键-&gt;属性，查看共享状态。<br><img src="3433091-b5b4b9bbc0ef5f7e.png" alt="clipboard.png"><br><img src="3433091-79cfd9a78d692fe5.png" alt="clipboard.png"><br><img src="3433091-4e0b8dd48584c661.png" alt="clipboard.png"><h2 id="挂载"><a href="#挂载" class="headerlink" title="挂载"></a>挂载</h2>在<code>Linux</code>上使用<code>mount</code>命令挂载<pre><code class="c">$ id ccr
+uid=<span class="number">1000</span>(ccr) gid=<span class="number">1000</span>(ccr) groups=<span class="number">1000</span>(ccr)
+$ sudo mount <span class="comment">//192.168.2.176/jvm /home/ccr/jvm/ -o username=ccr,password=ccr,gid=1000,uid=1000</span>
+</code></pre>
+参数依次是资源文件夹的<code>IP</code>和文件夹，挂载到目标机器的目录（必须先创建），<code>username</code>文件夹共享的<code>windows</code>账户，<code>password</code>密码，<code>gid</code>和<code>uid</code>是控制挂载后控制该目录的所有者，可以通过<code>id username</code>来获取。挂载成功后使用<code>ll</code>命令到<code>jvm</code>文件夹查看结果。<br><img src="http://upload-images.jianshu.io/upload_images/3433091-c0d5b0f94e934ff9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/620" alt="clipboard.png"><h2 id="NetBeans构建主机。"><a href="#NetBeans构建主机。" class="headerlink" title="NetBeans构建主机。"></a><code>NetBeans</code>构建主机。</h2>打开<code>NetBeans</code>，窗口-&gt;服务-&gt;右键  <code>c\c++</code>构建主机  添加主机。填写目标机器的IP及操作用户（<code>Linux</code>上必须安装<code>ssh</code>），我这里使用<code>ccr</code>用户。 最后项目文件的访问方式一定要选择【系统级别文件共享（<code>NFS</code>,<code>Samba</code>等）】，添加主机后 位主机设置路径映射。<br><img src="3433091-e4c0fa4fcda389b6.png" alt="clipboard.png"><br><img src="3433091-26cea2b1b64425d5.png" alt="clipboard.png"><br><img src="3433091-c6a24ce48352da6a.png" alt="clipboard.png"><br><img src="3433091-01f33f5c624cb110.png" alt="QQ截图20171110151648.png"><br><img src="3433091-214d6e2b941518d0.png" alt="QQ截图20171110151807.png"><h2 id="NetBeans构建项目。"><a href="#NetBeans构建项目。" class="headerlink" title="NetBeans构建项目。"></a><code>NetBeans</code>构建项目。</h2></li>
+<li>文件-&gt;新建项目，选择，<code>c/c++</code>，基于现有源代码的<code>c/c++</code>项目<br><img src="3433091-f64aac29218fb0d5.png" alt="clipboard.png"></li>
+<li>选择<code>openJdk</code>目录，选择构建的主机，选择定制<br><img src="3433091-6fdd756df1f4f842.png" alt="clipboard.png"></li>
+<li>写上预定以参数，这个参数和之前编译时的参数一直就行了<pre><code class="c">./configure  --with-debug-level=slowdebug --with-target-bits=<span class="number">64</span> --with-boot-jdk=/home/ccr/jdk1<span class="number">.7</span><span class="number">.0</span>_80
+</code></pre>
+<img src="3433091-b161f3c3a41bca4a.png" alt="clipboard.png"></li>
+<li>一直点下一步，直到最后一步，项目名称改成<code>openjdk8u</code><br><img src="3433091-ac9205fd316af1ed.png" alt="clipboard.png"></li>
+<li>点击完成后，项目开始配置和构建，在构建过程中遇到的问题，可以参考上面的编译过程去解决，然后重新清理和构建，直到构建成功为止。构建大概30分钟。<h2 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h2>构建过程中出现错误。<code>failed to create symbolic link： Operation not supported</code><br>因为由<code>windows</code>共享的方式，在<code>Linux</code>上挂载时使用的<code>cifs</code>文件系统，可以用<code>df -T</code>来查看，而<code>cifs</code>文件系统是创建不了软连接的（<code>symbolic link</code>），所以<code>windows</code>的共享方式需要改成<code>NFS</code>的方式（读者可以先去了解<code>HFS</code>和<code>cifs</code>的区别）。<br><img src="3433091-4960ac9fcea91965.png" alt="clipboard.png"><br><code>windows</code>要想通过<code>nfs</code>的方式共享文件，需要安装<code>nfs</code>服务，这里我选择用<code>haneWin NFS</code>。下载和文档链接如下：<br><a href="https://www.hanewin.net/nfs-e.htm" target="_blank" rel="noopener">https://www.hanewin.net/nfs-e.htm</a><br><a href="https://www.hanewin.net/doc/nfs/nfsd.htm" target="_blank" rel="noopener">https://www.hanewin.net/doc/nfs/nfsd.htm</a><br>软件需要破解，可在网上找到注册机。下图是配置图。<br><img src="3433091-5ef1ad52e670fc56.png" alt="clipboard.png"><br><img src="3433091-2152e47cb6e14e17.png" alt="clipboard.png"><br><img src="3433091-2b90dbc679214b9f.png" alt="clipboard.png"><br>上面的参数中<code>-mappall:1000:1000 -exec</code> 是必须的为客户端设置文件夹所属账户以及执行权限，设置完成后重启服务（如果是最新版本直接点击重启服务是可以的，或者到<code>windows</code>的服务管理重启）<br>重启后可在命令行中 <code>showcount -e</code> 进行查看。<br>客户端挂载<pre><code class="c"><span class="comment">//先安装nfs客户端在挂载，原来的挂载取消</span>
+$ sudo apt-get install nfs-common
+$ sudo mount -t nfs <span class="number">192.168</span><span class="number">.2</span><span class="number">.176</span>:/jvm /home/ccr/jvm/
+<span class="comment">//挂载成功后，进入目录测试一下能否创建软连接</span>
+$ touch foo  --创建文件
+$ ln -s bar foo
+</code></pre>
+最后运行成功<br><img src="3433091-125985cd43b66e47.png" alt="clipboard.png"><h1 id="NetBeans运行项目。"><a href="#NetBeans运行项目。" class="headerlink" title="NetBeans运行项目。"></a><code>NetBeans</code>运行项目。</h1></li>
+<li>准备<code>Hello World class</code>文件（很简单的<code>javaHelloWorld</code>，用<code>openjdk</code>编译好的<code>javac</code>去编译，或者用该版本以下版本去编译。），放到共享文件夹内。我的放在<code>jvm/javatest</code>目录下。</li>
+<li>右键项目-&gt;属性-&gt;运行-&gt;编辑运行命令-&gt;输入类路径和类名<br><img src="3433091-5148f13e2c1de5a2.png" alt="clipboard.png"><br><img src="3433091-de8b30d01ef478e5.png" alt="clipboard.png"></li>
+<li>好了现在可以运行项目了，点击运行-&gt;运行项目，<code>netbeans</code>会询问你用什么可执行文件来运行，选择<code>java</code>即可<br><img src="3433091-8573cd61828ff74c.png" alt="clipboard.png"><br>运行结果如下：<br><img src="3433091-ba558ae92a1e7273.png" alt="clipboard.png"><h1 id="NetBeans调试项目。"><a href="#NetBeans调试项目。" class="headerlink" title="NetBeans调试项目。"></a>NetBeans调试项目。</h1><code>System.out.println(...)</code>实际上调用的是<code>jdk/src/share/native/java/io/io_util.c</code> 文件中的 <code>writeBytes</code> 方法，定位到这个方法打上断点。点击调试项目，如果出现<code>SIGSEGV</code> 警告，忽略往前继续。最终执行到改断点，你就能看到<code>jvm</code>正在干什么。<br><img src="3433091-b24ad588d9cef967.png" alt="clipboard.png"><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1>好了，以上就是利用<code>NetBeans</code>远程开发和<code>Linux</code>虚拟机进行的<code>OpenJDK</code>的构建和调试。构建过程中有很多错误，读者要有耐心，利用虚拟机的快照功能对虚拟机进行备份。尽量参考官方的文档。</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OpenJDK/" rel="tag"># OpenJDK</a>
+          
+            <a href="/tags/Netbeans/" rel="tag"># Netbeans</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/15/了解java标准类库/" rel="prev" title="了解java标准类库">
+                了解java标准类库 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div onclick="showGitment()" id="gitment-display-button">显示 Gitment 评论</div>
+        <div id="gitment-container" style="display:none"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/gougou.jpg"
+                alt="鸡哥" />
+            
+              <p class="site-author-name" itemprop="name">鸡哥</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/jiges" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i></a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:ccr12312@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i></a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#NetBeans远程开发"><span class="nav-number">1.</span> <span class="nav-text">NetBeans远程开发</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#准备Linux环境编译openJDK"><span class="nav-number">2.</span> <span class="nav-text">准备Linux环境编译openJDK</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#准备Linux环境。"><span class="nav-number">2.1.</span> <span class="nav-text">准备Linux环境。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#获取OpenJDK源码。"><span class="nav-number">2.2.</span> <span class="nav-text">获取OpenJDK源码。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置config（预构建）"><span class="nav-number">2.3.</span> <span class="nav-text">配置config（预构建）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#make-all-构建"><span class="nav-number">2.4.</span> <span class="nav-text">make all(构建)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#This-OS-is-not-supported"><span class="nav-number">2.4.1.</span> <span class="nav-text">This OS is not supported:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#invalid-option-39-39"><span class="nav-number">2.4.2.</span> <span class="nav-text">invalid option -- '/'</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#invalid-suffix-on-literal"><span class="nav-number">2.4.3.</span> <span class="nav-text">invalid suffix on literal</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Werror-deprecated-declarations"><span class="nav-number">2.4.4.</span> <span class="nav-text">-Werror=deprecated-declarations</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#windows-NetBeans构建调试"><span class="nav-number">3.</span> <span class="nav-text">windows NetBeans构建调试</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#创建文件夹"><span class="nav-number">3.1.</span> <span class="nav-text">创建文件夹</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分享文件夹"><span class="nav-number">3.2.</span> <span class="nav-text">分享文件夹</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#挂载"><span class="nav-number">3.3.</span> <span class="nav-text">挂载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NetBeans构建主机。"><span class="nav-number">3.4.</span> <span class="nav-text">NetBeans构建主机。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NetBeans构建项目。"><span class="nav-number">3.5.</span> <span class="nav-text">NetBeans构建项目。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#错误处理"><span class="nav-number">3.6.</span> <span class="nav-text">错误处理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#NetBeans运行项目。"><span class="nav-number">4.</span> <span class="nav-text">NetBeans运行项目。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#NetBeans调试项目。"><span class="nav-number">5.</span> <span class="nav-text">NetBeans调试项目。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">鸡哥</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'jiges',
+            repo: 'jiges.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '3bfafe08bfcef158878f09910c6a9f2aef7391de',
+            
+                client_id: 'c41b93a72f2b21dcc1ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      function showGitment(){
+        document.getElementById("gitment-display-button").style.display = "none";
+        document.getElementById("gitment-container").style.display = "block";
+        renderGitment();
+      }
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("paa9xqTl09B7K7pJzx3tI8A7-gzGzoHsz", "Tt2YuM3CWPcI5gNeGiQR9qeh");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="事务,分布式," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="这是同事在分享会上整理的资料，收获颇丰。 事务管理    几乎所有的Web项目中都会涉及数据库，那么当多个客户行为同时操作到了一条或一批数据时，就有可能因这种并发操作导致他们之间相互产生影响而导致错误的结果。本文将详细介绍这些问题产生的过程以及如何解决这些问题。">
+<meta name="keywords" content="事务,分布式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式事务管理">
+<meta property="og:url" content="https://jiges.github.io/2017/11/24/分布式事务管理/index.html">
+<meta property="og:site_name" content="鸡哥の博客">
+<meta property="og:description" content="这是同事在分享会上整理的资料，收获颇丰。 事务管理    几乎所有的Web项目中都会涉及数据库，那么当多个客户行为同时操作到了一条或一批数据时，就有可能因这种并发操作导致他们之间相互产生影响而导致错误的结果。本文将详细介绍这些问题产生的过程以及如何解决这些问题。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://jiges.github.io/2017/11/24/分布式事务管理/lostUpdate.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/24/分布式事务管理/dirtyReads.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/24/分布式事务管理/nonRepeatableReads.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/24/分布式事务管理/phantomReads.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/24/分布式事务管理/deadLock.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/24/分布式事务管理/global_tx_isolation.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/24/分布式事务管理/spring-hibernate-tx.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/24/分布式事务管理/xlt_01.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/24/分布式事务管理/xlt_02.png">
+<meta property="og:image" content="https://jiges.github.io/2017/11/24/分布式事务管理/tcc.png">
+<meta property="og:updated_time" content="2017-11-24T06:26:06.706Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="分布式事务管理">
+<meta name="twitter:description" content="这是同事在分享会上整理的资料，收获颇丰。 事务管理    几乎所有的Web项目中都会涉及数据库，那么当多个客户行为同时操作到了一条或一批数据时，就有可能因这种并发操作导致他们之间相互产生影响而导致错误的结果。本文将详细介绍这些问题产生的过程以及如何解决这些问题。">
+<meta name="twitter:image" content="https://jiges.github.io/2017/11/24/分布式事务管理/lostUpdate.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://jiges.github.io/2017/11/24/分布式事务管理/"/>
+
+
+
+
+
+  <title>分布式事务管理 | 鸡哥の博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">鸡哥の博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/index.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://jiges.github.io/2017/11/24/分布式事务管理/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="鸡哥">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/gougou.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鸡哥の博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">分布式事务管理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-24T10:33:13+08:00">
+                2017-11-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/分布式/" itemprop="url" rel="index">
+                    <span itemprop="name">分布式</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/11/24/分布式事务管理/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/11/24/分布式事务管理/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/11/24/分布式事务管理/" class="leancloud_visitors" data-flag-title="分布式事务管理">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>这是同事在分享会上整理的资料，收获颇丰。</p>
+<p>事务管理<br>    几乎所有的Web项目中都会涉及数据库，那么当多个客户行为同时操作到了一条或一批数据时，就有可能因这种并发操作导致他们之间相互产生影响而导致错误的结果。本文将详细介绍这些问题产生的过程以及如何解决这些问题。</p>
+</blockquote>
+<a id="more"></a>
+<h1 id="共享资源与并发"><a href="#共享资源与并发" class="headerlink" title="共享资源与并发"></a>共享资源与并发</h1><p>什么是共享资源？</p>
+<blockquote>
+<p>共享资源指的是可以被多个任务同时使用的资源，在本文中，我们的共享资源指的是数据库、表以及表中的记录。<br>当程序并发操作同一条或同一批记录时，可能会发生以下四种并发问题。</p>
+</blockquote>
+<ul>
+<li>更新丢失（<code>Lost Update</code>）</li>
+<li>脏读（<code>Dirty Reads</code>）</li>
+<li>不可重复读（<code>Non-repeatable Reads</code>）</li>
+<li>幻象读（<code>Phantom Reads</code>）</li>
+</ul>
+<h2 id="更新丢失"><a href="#更新丢失" class="headerlink" title="更新丢失"></a>更新丢失</h2><p>如下图所示，程序<code>X</code>对记录<code>A</code>更新后又被程序Y覆盖，导致程序<code>X</code>的更新丢失，我们称这样的意外为<strong>更新丢失</strong>。<br><img src="lostUpdate.png" alt="更新丢失"></p>
+<h2 id="脏读"><a href="#脏读" class="headerlink" title="脏读"></a>脏读</h2><p>如下图所示，程序<code>X</code>先对记录<code>A</code>进行了更新后，程序Y从数据库内存中读取了更新的记录<code>A</code>，但接下来由于程序<code>X</code>发生了一些异常导致对记录<code>A</code>的更新被回滚了，因此记录<code>Y</code>读取的就是一条脏记录，我们称这种意外为<strong>脏读</strong>。<br><img src="dirtyReads.png" alt="脏读"></p>
+<h2 id="不可重复读"><a href="#不可重复读" class="headerlink" title="不可重复读"></a>不可重复读</h2><p>如下图所示，程序<code>X</code>先读取了记录<code>A</code>后，程序<code>Y</code>更新了<code>A</code>记录并进行了提交，由于业务需要程序<code>X</code>又再次从数据库中读取了<code>A</code>记录，按程序的设想两次读取的记录应该是一致的，但由于执行过程中程序<code>Y</code>的更新操作导致两次读取的信息不一致，我们称这种意外为<strong>不可重复读</strong>。<br><img src="nonRepeatableReads.png" alt="不可重复读"></p>
+<h2 id="幻象读"><a href="#幻象读" class="headerlink" title="幻象读"></a>幻象读</h2><p>如下图所示，程序<code>X</code>从表中批量读取了记录<code>A</code>后，程序<code>Y</code>对表中进行了<code>insert</code>或<code>delete</code>操作，由于业务需要程序<code>X</code>又再次从数据库中批量读取了<code>A</code>记录，按程序的设想两次读取的记录数量应该是一致的，但由于执行过程中程序<code>Y</code>的<code>insert/delete</code>操作导致两次读取的记录数量不一致，我们称这种意外为<strong>幻象读</strong>。<br><img src="phantomReads.png" alt="幻象读"></p>
+<h1 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h1><h2 id="什么是事务？"><a href="#什么是事务？" class="headerlink" title="什么是事务？"></a>什么是事务？</h2><p>事务(<code>Transaction</code>)是访问并可能更新数据库中各种数据项的一个程序执行单元(<code>unit</code>)，通俗的说，事务就是由一到多条<code>sql</code>组成的一个不可分割的操作单元。</p>
+<h2 id="事务有哪些特性？"><a href="#事务有哪些特性？" class="headerlink" title="事务有哪些特性？"></a>事务有哪些特性？</h2><ul>
+<li>原子性（<code>Atomicity</code> ）<br>事务是不可拆分的执行单元，要么都执行，要么都不执行。</li>
+<li>一致性（ <code>Consistency</code> ）<br>事务执行的结果必须是使数据库从一个一致性状态变到另一个一致性状态。因此当数据库只包含成功事务提交的结果时，就说数据库处于一致性状态。如果数据库系统 运行中发生故障，有些事务尚未完成就被迫中断，这些未完成事务对数据库所做的修改有一部分已写入物理数据库，这时数据库就处于一种不正确的状态，或者说是不一致的状态。</li>
+<li>隔离性（ <code>Isolation</code> ）<br>一个事务的执行不能其它事务干扰。即一个事务内部的操作及使用的数据对其它并发事务是隔离的，并发执行的各个事务之间不能互相干扰。</li>
+<li>持久性（ <code>Durability</code> ）<br>事务一旦提交，它对数据库中的数据的改变就应该是永久性的。接下来的其它操作或故障不应该对其执行结果有任何影响。</li>
+</ul>
+<h2 id="衡量并发事务正确执行的标准是什么？"><a href="#衡量并发事务正确执行的标准是什么？" class="headerlink" title="衡量并发事务正确执行的标准是什么？"></a>衡量并发事务正确执行的标准是什么？</h2><p>可串行性，即并发执行的事务与多个事务的某个串行执行的结果一致，我们称此为并发事务的可串行性，这是衡量并发事务是否正确执行的唯一标准。</p>
+<h1 id="事务管理"><a href="#事务管理" class="headerlink" title="事务管理"></a>事务管理</h1><h2 id="排它锁与共享锁"><a href="#排它锁与共享锁" class="headerlink" title="排它锁与共享锁"></a>排它锁与共享锁</h2><p>事务的可串行性需要排它锁和共享锁提供保障：</p>
+<ul>
+<li>排它锁(<code>eXclusive lock</code>,简记为<code>X</code>锁)<br>排它锁又称为写锁，若事务T对数据对象A加上X锁，则只允许T读取和修改A，其它任何事务都不能再对A加任何类型的锁，直到T释放A上的锁。</li>
+<li>共享锁（<code>Share lock</code>,简记为<code>S</code>锁）<br>共享锁又称为读锁，若事务<code>T</code>对数据对象<code>A</code>加上<code>S</code>锁，则其它事务只能再对<code>A</code>加<code>S</code>锁，而不能加<code>X</code>锁，直到<code>T</code>释放<code>A</code>上的<code>S</code>锁。</li>
+</ul>
+<h2 id="事务一致性解决方案"><a href="#事务一致性解决方案" class="headerlink" title="事务一致性解决方案"></a>事务一致性解决方案</h2><h3 id="悲观锁"><a href="#悲观锁" class="headerlink" title="悲观锁"></a>悲观锁</h3><p>修改数据前锁定记录，阻止其他线程访问。如果加锁失败，说明该记录正在被修改，那么当前查询可能要等待或者抛出异常。如果成功加锁，那么就可以对记录做修改，事务完成后就会解锁了。其间如果有其他对该记录做修改或加排他锁的操作，都会等待我们解锁或直接抛出异常。悲观锁主要用于以下两种环境：</p>
+<ul>
+<li>资源竞争激烈的环境</li>
+<li>发生并发冲突时采用回滚机制耗费的成本比用锁保护数据成本高的环境</li>
+</ul>
+<h3 id="乐观锁"><a href="#乐观锁" class="headerlink" title="乐观锁"></a>乐观锁</h3><p>事务在<code>commit</code>时进行检查，如果当前事务所处理的数据在事务<code>begin</code>到<code>commit</code>之间被其他事务修改过，那么就会就会产生一个错误，并对当前事务进行的操作进行<code>rollback</code>，否则进行<code>commit</code>操作。乐观锁主要用于以下两种环境：</p>
+<ul>
+<li>资源竞争少的环境</li>
+<li>不出现或者偶尔出现回滚事务的成本高于read数据时锁定数据的成本的环境</li>
+</ul>
+<h3 id="时标控制"><a href="#时标控制" class="headerlink" title="时标控制"></a>时标控制</h3><p>事务在启动时设定一个时间戳，然后在每个操作执行前都进行验证：如果当前操作对应的资源的被其他事务进行最后一次<code>read</code>或<code>write</code>并<code>commit</code>的时间戳大于当前事务开始的时间戳，那么就放弃当前事务并进行<code>rollback</code>，然后再由客户重新启动事务。这就意味着，当前事务启动后，若被操作的资源被其他事务<code>read</code>或<code>write</code>并<code>commit</code>后就直接放弃再重新启动事务，直到新的时间戳能够满足条件。</p>
+<h3 id="锁协议"><a href="#锁协议" class="headerlink" title="锁协议"></a>锁协议</h3><p>除了以上三种解决方案，还有一些协议可以在不同程度上为并发操作提供保障，主要有三阶段封锁协议与两段封锁协议。</p>
+<ul>
+<li>三级封锁协议（也称为三级加锁协议）<ul>
+<li>一级封锁： 事务在修改资源前先为资源添加排它锁，直到事务结束时才释放此资源，此封锁可以解决更新丢失问题。</li>
+<li>二级封锁： 在一级封锁的基础上，遇到事务读取资源的情况，那么在事务读取资源前添加共享锁，读完后立即释放资源，此封锁可以解决更新丢失和脏读问题。</li>
+<li>三级封锁： 在一级封锁的基础上，遇到事务读取资源的情况，那么在事务读取资源前添加共享锁，知道事务结束后才释放资源，此封锁可以解决更新丢失、脏读、 不可重复读以及幻想读问题。</li>
+</ul>
+</li>
+<li>两段锁协议<br>此协议将事务分为两个阶段：<ul>
+<li>第一阶段： 资源上锁阶段，对事务中所有涉及的资源在read/write之前进行上锁操作。</li>
+<li>第二阶段： 资源释放阶段，一旦事务释放了第一个资源，那么当前事务此后将不再进行任何封锁操作，只进行解锁对资源进行释放的操作。如果并行执行的所有事务均遵守两段锁协议，那么他们的并行调度具有可串行性。</li>
+</ul>
+</li>
+</ul>
+<h2 id="封锁后遗症"><a href="#封锁后遗症" class="headerlink" title="封锁后遗症"></a>封锁后遗症</h2><p>使用封锁技术可以从不同程度上解决事务的一致性问题，但封锁技术同时也会带来一些后遗症，主要有活锁和死锁。</p>
+<h3 id="什么是活锁？"><a href="#什么是活锁？" class="headerlink" title="什么是活锁？"></a>什么是活锁？</h3><p>事务<code>T1</code>封锁了对象<code>A</code>后，事务<code>T2</code>请求封锁对象<code>A</code>，于是<code>T2</code>进行等待，接着<code>T3</code>也请求封锁对象<code>A</code>，<code>T3</code>等待，当<code>T1</code>释放了<code>A</code>以后，系统如果先批准了<code>T3</code>对<code>A</code>的封锁请求，那么<code>T2</code>继续等待，接着可能有<code>T4</code>、<code>T5</code>…，如果系统一直未批<code>T2</code>的请求，那么<code>T2</code>就一直无法执行，这就造成了“活锁”。如何避免活锁？采用先来先服务策略。</p>
+<h3 id="什么是死锁？"><a href="#什么是死锁？" class="headerlink" title="什么是死锁？"></a>什么是死锁？</h3><p>如下图所示，线程<code>X</code>和线程<code>Y</code>都需要资源<code>A</code>和<code>B</code>，如果<code>X</code>先锁定了<code>A</code>，<code>Y</code>先锁定了<code>B</code>，那么<code>X</code>就会等待<code>Y</code>释放资源<code>B</code>，<code>Y</code>同时也在等待<code>X</code>释放<code>A</code>，这样就会无限等待下去而造成“死锁”。<br><img src="deadLock.png" alt="死锁"></p>
+<h3 id="如何解决死锁问题呢？"><a href="#如何解决死锁问题呢？" class="headerlink" title="如何解决死锁问题呢？"></a>如何解决死锁问题呢？</h3><p>操作系统一般采用一次封锁所有资源的方式，但这样大大限制了并发，所以<code>DBMS</code>采用了诊断并解除死锁的方式，即每隔一个时间片段机会检测是否存在死锁，如果存在，那么就会选择撤销代价小的事务进行回滚，让撤销代价大的事务执行。</p>
+<h2 id="嵌套事务管理"><a href="#嵌套事务管理" class="headerlink" title="嵌套事务管理"></a>嵌套事务管理</h2><p>锁的获取与释放规则：</p>
+<ul>
+<li>规则1：如果子事务获取了某条数据的读锁，那么只有其父事务可以对该对象添加写锁；</li>
+<li>规则2：如果子事务获取了某条数据的写锁，那么只有其父事务可以持有该写锁，以及添加读锁；</li>
+<li>规则3：当子事务<code>commit</code>时，它所有的锁由其父事务保留；</li>
+<li>规则4：当子事务放弃时，它所有的锁将被放弃，如果其父事务已经获取了这些锁，那么它可以继续保留；</li>
+</ul>
+<p>并行调度规则：</p>
+<ul>
+<li>规则1：父事务不允许和子事务并发运行；</li>
+<li>规则2：同层次的子事务可以并发运行；</li>
+</ul>
+<p><code>commit</code>和<code>rollback</code>规则：</p>
+<ul>
+<li>规则1：子事务执行前会为父事务设定一个状态，如果子事务失败，那么所涉及到的父事务中的对象将被回滚到设定的状态；</li>
+<li>规则2：子事务是父事务的一部分，只有当顶级的事务<code>commit</code>时，所有的子事务才会<code>commit</code>，如果父事务<code>rollback</code>，那么所有的子孙事务也会<code>rollback</code>。</li>
+</ul>
+<h2 id="数据库隔离级别"><a href="#数据库隔离级别" class="headerlink" title="数据库隔离级别"></a>数据库隔离级别</h2><p> 数据库隔离级别:数据库设定满足项目需求的隔离级别，设置的隔离级别越高，数据出现不一致性的可能越小，但这同时也会降低数据库并发访问的数量而降低性能。</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th style="text-align:center">避免覆盖更新</th>
+<th style="text-align:center">避免脏读</th>
+<th style="text-align:center">避免不可重复读</th>
+<th style="text-align:center">避免幻读</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Read uncommitted</code> (读未提交)</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">×</td>
+<td style="text-align:center">×</td>
+<td style="text-align:center">×</td>
+<td></td>
+</tr>
+<tr>
+<td><code>Read committed</code> (读已提交)</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">×</td>
+<td style="text-align:center">×</td>
+<td><code>Oracle</code>默认级别</td>
+</tr>
+<tr>
+<td><code>Repeatable read</code> (可重复读)</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">×</td>
+<td><code>MySql</code>默认级别</td>
+</tr>
+<tr>
+<td><code>Serializable</code> (串行化)</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+</tr>
+</tbody>
+</table>
+<p><code>MySql</code>隔离级别操作示例：</p>
+<ul>
+<li>操作一：查看当前会话隔离级别<br><code>select @@tx_isolation;</code></li>
+<li>操作二：查看系统当前隔离级别<br><code>select @@global.tx_isolation;</code></li>
+<li>操作三：设置当前会话隔离级别<br><code>set session transaction isolatin level repeatable read;</code></li>
+<li>操作四：设置系统当前隔离级别<br><code>set global transaction isolation level repeatable read;</code></li>
+</ul>
+<p>在<code>MySql</code>中查询出的默认隔离级别：<br><img src="global_tx_isolation.png" alt="隔离级别"></p>
+<h1 id="Web项目事务管理"><a href="#Web项目事务管理" class="headerlink" title="Web项目事务管理"></a>Web项目事务管理</h1><p>本小节将介绍事务在项目中的实际应用，并且只说明了一些经常使用的场景。</p>
+<h2 id="Spring-Hibernate声明式事务"><a href="#Spring-Hibernate声明式事务" class="headerlink" title="Spring + Hibernate声明式事务"></a>Spring + Hibernate声明式事务</h2><p><img src="spring-hibernate-tx.png" alt="spring-hibernate声明式事务管理"><br>上图是<code>spring-hibernate</code>声明式事务管理声明式事务指的是在配置文件中声明。用在<code>Spring</code>配置文件中声明式的处理事务来代替代码式的处理事务。这样的好处是，事务管理不侵入开发的组件，具体来说，业务逻辑对象就不会意识到正在事务管理之中，事实上也应该如此，因为事务管理是属于系统层面的服务，而不是业务逻辑的一部分，如果想要改变事务管理策划的话，也只需要在定义文件中重新配置即可；在不需要事务管理的时候，只要在设定文件上修改一下，即可移去事务管理服务，无需改变代码重新编译，这样维护起来极其方便，因此这也是我们项目中的第一选择。<br><code>Spring</code>使用<code>AOP</code>来完成声明式的事务管理，因而声明式事务是以方法为单位，<code>Spring</code>的事务属性自然就在于描述事务应用至方法上的策略，在<code>Spring</code>中事务属性有以下参数:</p>
+<ul>
+<li><code>name</code>，方法名称，可以使用方法全名，也可以使用<code>Spring</code>的表达式，我们一般使用<code>spring</code>表达式来对方法进行匹配，因此我们的方法命名也必须符合要求才能启动事务管理。</li>
+<li><code>propagation</code>，事务传播行为，<code>Hibernate</code>设定了7种事务传播行为，如下表所示：<ul>
+<li><code>PROPAGATION_REQUIRED</code>:对应配置中的<code>REQUIRED</code>，如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中,这是最常见的选择 </li>
+<li><code>PROPAGATION_SUPPORTS</code>:对应配置中的<code>SUPPORTS</code>，支持当前事务，如果当前没有事务，就以非事务方式执行</li>
+<li><code>PROPAGATION_MANDATORY</code>:对应配置中的<code>MANDATORY</code>，使用当前的事务，如果当前没有事务，就抛出异常</li>
+<li><code>PROPAGATION_REQUIRES_NEW</code>:应配置中的<code>REQUIRES_NEW</code>，新建事务，如果当前存在事务，把当前事务挂起</li>
+<li><code>PROPAGATION_NOT_SUPPORTED</code>:对应配置中的<code>NOT_SUPPORTED</code>，以非事务方式执行操作，如果当前存在事务，就把当前事务挂起</li>
+<li><code>PROPAGATION_NEVER</code>:对应配置中的<code>NEVER</code>，以非事务方式执行，如果当前存在事务，则抛出异常</li>
+<li><code>PROPAGATION_NESTED</code>:对应配置中的<code>NESTED</code>，如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则执行与PROPAGATION_REQUIRED类 似的操作</li>
+</ul>
+</li>
+<li><code>isolation</code>，事务隔离级别，对应到数据库隔离级别，此参数为非强制选项，默认值为<code>DEFAULT</code>，即根据系统选用的数据库自动使用数据库默认的事务隔离级别，例如<code>MySql</code>自动使用<code>REPEATABLE_READ</code>。<ul>
+<li><code>DEFAULT</code>:数据库默认级别</li>
+<li><code>READ_UNCOMMITTED</code>:读未提交</li>
+<li><code>READ_COMMITTED</code>:读已提交</li>
+<li><code>REPEATABLE_READ</code>:可重复读</li>
+<li><code>SERIALIZABLE</code>:串行化</li>
+</ul>
+</li>
+<li><code>readonly</code>，用于设定当前事务是否只读事务，此参数为非强制选项，它默认为<code>false</code>，如果确定为只读事务，那么可以设定为<code>true</code>。</li>
+<li><code>timeout</code>，用于设定事务超时时间（单位：秒），此参数为非强制选项，它的默认值为<code>-1</code>，表示没有时间限制，如果系统对时间要求比较明确，那么可以设定一个固定值。</li>
+<li><code>rollback-for</code>，用于设定与到哪些异常时进行事务回滚操作，我们的项目中遇到所有类型的异常都将回滚，所以我们配置的是 <code>rollback-for=&quot;java.lang.Throwable&quot;</code>。</li>
+<li><p><code>no-rollback-for</code>，与<code>rollback-for</code>对应的还有<code>no-rollback-for</code>,此参数可以从<code>rollback-for</code>范围内排除不需要进行回滚的异常。</p>
+<h2 id="Spring-Hibernate-注解式事务"><a href="#Spring-Hibernate-注解式事务" class="headerlink" title="Spring + Hibernate 注解式事务"></a>Spring + Hibernate 注解式事务</h2><p>除了声明式事务管理，<code>spring</code>也为我们提供了注解式事务管理，我们可以在类以及方法上使用注解来管理事务。例如：</p>
+<pre><code class="java"><span class="meta">@Transactional</span>
+<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestServiceBean</span> <span class="keyword">implements</span> <span class="title">TestService</span> </span>{
+  <span class="keyword">private</span> TestDao dao;
+
+  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setDao</span><span class="params">(TestDao dao)</span> </span>{
+      <span class="keyword">this</span>.dao = dao;
+  }
+
+  <span class="meta">@Transactional</span>(propagation = Propagation.NOT_SUPPORTED)
+  <span class="function"><span class="keyword">public</span> List <span class="title">getAll</span><span class="params">()</span> </span>{
+      <span class="keyword">return</span> <span class="keyword">null</span>;
+  }
+}
+</code></pre>
+<p><code>@Transactional</code>可以配置在类或方法上，如果类和方法上都配置了，那么方法中的配置会覆盖类的全局配置，此注解的参数与声明式配置中的参数基本一致，这里不再做详细说明。</p>
+<h2 id="Hibernate锁模式"><a href="#Hibernate锁模式" class="headerlink" title="Hibernate锁模式"></a>Hibernate锁模式</h2><p><code>Hibernate</code>的悲观锁机制完全依赖<code>JDBC</code>连接或<code>JTA</code>资源实现，<code>Hibernate</code>不能在<code>Session</code>缓存中加任何锁，只能为<code>JDBC</code>连接设置隔离级别。但乐观锁就要灵活的多，除了可以通过声明式事务管理和注解式事务管理外，我们还可以在代码中控制锁的细节。这主要通过<code>Hibernate</code>中的<code>LockMode</code>来控制。</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th style="text-align:center">可用</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NONE</code></td>
+<td style="text-align:center">×</td>
+<td>无锁机制，<code>Hibernate</code>默认采用此模式，仅供<code>Hibernate</code>内部使用</td>
+</tr>
+<tr>
+<td><code>WRITE</code></td>
+<td style="text-align:center">×</td>
+<td>在 <code>Insert</code> 和 <code>Update</code> 记录的时候会自动获取，仅供<code>Hibernate</code>内部使用</td>
+</tr>
+<tr>
+<td><code>READ</code></td>
+<td style="text-align:center">×</td>
+<td>在读取记录的时候会自动获取，仅供<code>Hibernate</code>内部使用</td>
+</tr>
+<tr>
+<td><code>FORCE</code></td>
+<td style="text-align:center">×</td>
+<td><code>@Deprecated</code>，被<code>PESSIMISTIC_FORCE_INCREMENT</code>替代</td>
+</tr>
+<tr>
+<td><code>PESSIMISTIC_FORCE_INCREMENT</code></td>
+<td style="text-align:center">√</td>
+<td>强制更新数据库中对象的版本属性,即表明当前事务已经更新了这个对象（事务尚未提交）</td>
+</tr>
+<tr>
+<td><code>UPGRADE</code></td>
+<td style="text-align:center">×</td>
+<td><code>@Deprecated</code>，被<code>PESSIMISTIC_WRITE</code>替代</td>
+</tr>
+<tr>
+<td><code>PESSIMISTIC_READ</code></td>
+<td style="text-align:center">√</td>
+<td>悲观锁，即利用数据库的<code>for update</code>字句加锁，事务开始即获得数据库的锁。</td>
+</tr>
+<tr>
+<td><code>PESSIMISTIC_WRITE</code></td>
+<td style="text-align:center">√</td>
+<td>悲观锁，即利用数据库的<code>for update</code>字句加锁，事务开始即获得数据库的锁。</td>
+</tr>
+<tr>
+<td><code>PESSIMISTIC_FORCE_INCREMENT</code></td>
+<td style="text-align:center">√</td>
+<td>悲观锁，且强制更新版本属性</td>
+</tr>
+<tr>
+<td><code>OPTIMISTIC</code></td>
+<td style="text-align:center">√</td>
+<td>乐观锁</td>
+</tr>
+<tr>
+<td><code>OPTIMISTIC_FORCE_INCREMENT</code></td>
+<td style="text-align:center">√</td>
+<td>乐观锁，且强制更新版本属性</td>
+</tr>
+<tr>
+<td><code>UPGRADE_NOWAIT</code></td>
+<td style="text-align:center">√</td>
+<td>Oracle 的特定实现，利用 <code>Oracle</code> 的 <code>for update nowait</code> 子句实现加锁</td>
+</tr>
+<tr>
+<td><code>UPGRADE_SKIPLOCKED</code></td>
+<td style="text-align:center">√</td>
+<td><code>Oracle</code>应用的查询请求使用<code>SELECT ... for update skip</code></td>
+</tr>
+</tbody>
+</table>
+<p>版本属性，即通过<code>@Version</code>来标记的属性，<code>JPA</code>通过实体类中使用<code>@Version</code>注解来发现数据库记录的并发操作，当有个记录更新了（事务尚未提交）该记录时就表明此记录已经被更新，其他并发操作试图操作此记录时就抛出异常<code>OptimisticLockException</code>。<br><code>Hibernate</code>中可以在<code>Query.setLockMode</code>、<code>Session.lock</code>、<code>Session.get</code>、<code>Session.find</code>以及<code>Criteria.setLockMode</code>等操作中设定锁模式。另外需要注意的是，需要与<code>LockModeType</code>进行区分，<code>LockModeType</code>也有类似的功能，但仅用于<code>java</code>持久化查询语言（<code>JPQL</code>）或<code>Criteria API</code>查询，否则会抛异常。</p>
+<h1 id="分布式事务管理"><a href="#分布式事务管理" class="headerlink" title="分布式事务管理"></a>分布式事务管理</h1><h2 id="分布式"><a href="#分布式" class="headerlink" title="分布式"></a>分布式</h2><p>分布式系统是指软件被拆分成多个组件，并分布在不同的网算机上，彼此之间仅仅通过消息传递进行通信和协调的系统。<br>常见的分布式方案有以下几种：</p>
+<ul>
+<li>分布式存储<br>大型网站常常需要处理海量数据，单台计算机往往无法提供足够的内存空间，可以对这些数据进行分布式存储。</li>
+<li>分布式服务<br>将应用和服务进行分层和分割，然后将应用和服务模块进行分布式部署。这样做不仅可以提高并发访问能力、减少数据库连接和资源消耗，还能使不同应用复用共同的服务，使业务易于扩展。</li>
+<li>分布式静态资源<br>对网站的静态资源如<code>JS</code>、<code>CSS</code>、图片等资源进行分布式部署可以减轻应用服务器的负载压力，提高访问速度。</li>
+<li>分布式计算<br>随着计算技术的发展，有些应用需要非常巨大的计算能力才能完成，如果采用集中式计算，需要耗费相当长的时间来完成。分布式计算将该应用分解成许多小的部分，分配给多台计算机进行处理。这样可以节约整体计算时间，大大提高计算效率。</li>
+</ul>
+<p>和集中式系统相比，分布式系统的性价比更高、处理能力更强、可靠性更高、也有很好的扩展性。但是，分布式在解决了网站的高并发问题的同时也带来了一些其他问题，其中分布式存储和服务带来的数据一致性就是其中典型的一个问题。在介绍分布式的数据一致性之前，需先向大家介绍下远程通信方式和语义以及幂等性的概念。</p>
+<h3 id="远程通信方式"><a href="#远程通信方式" class="headerlink" title="远程通信方式:"></a>远程通信方式:</h3><ul>
+<li>远程过程调用:<code>Remote Procedure Call</code>，简称<code>RPC</code>，例如，我们使用<code>cxf</code>、<code>dubbo</code>等框架采用的就是此通信方式</li>
+<li>远程方法调用:<code>Remote Method Invocation</code>，简称<code>RMI</code>，这是<code>java</code>平台特有的一种通信方式，使用的较少</li>
+<li>消息队列调用:<code>Message Queue</code>,简称<code>MQ</code>，此方式常使用<code>RabbitMQ</code>、<code>ActiveMQ</code>、<code>ZeroMQ</code>等消息中间件进行消息的传递与应答，避免生产者与消费者直接接触，此方式可以避免消息丢失，同时可以对系统某时间段访问请求过多起缓冲作用</li>
+</ul>
+<h3 id="远程通信语义"><a href="#远程通信语义" class="headerlink" title="远程通信语义:"></a>远程通信语义:</h3><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>定义</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>或许</td>
+<td>远程方法可能执行一次，也可能不执行</td>
+<td>消息丢失或服务崩溃</td>
+</tr>
+<tr>
+<td>最少一次</td>
+<td>调用者知道最少调用了一次或者未接受到执行结果（接受到异常）</td>
+<td>重复调用幂等性的服务或服务异常</td>
+</tr>
+<tr>
+<td>最多一次</td>
+<td>调用者知道最多调用了一次或者未接受到执行结果（接受到异常）</td>
+<td>有效防止因非幂等性而导致的随机故障</td>
+</tr>
+</tbody>
+</table>
+<p>分布式通信根据自己的需要可以选择不同的语义，下表根据分布式对请求重发、过滤、重新执行以及应答等问题给出了通信语义的方案。</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>请求重发</th>
+<th>过滤重复请求</th>
+<th>重新执行或重传应答</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>或许</td>
+<td>否</td>
+<td>不适用</td>
+<td>不适用</td>
+</tr>
+<tr>
+<td>最少一次</td>
+<td>是</td>
+<td>否</td>
+<td>重新执行</td>
+</tr>
+<tr>
+<td>最多一次</td>
+<td>是</td>
+<td>是</td>
+<td>重传应答</td>
+</tr>
+</tbody>
+</table>
+<h3 id="什么是方法的幂等性？"><a href="#什么是方法的幂等性？" class="headerlink" title="什么是方法的幂等性？"></a>什么是方法的幂等性？</h3><p>方法的幂等性指的是此方法任意多次执行所产生的影响均与一次执行的影响相同。</p>
+<p>保证分布式服务的幂等性是分布式架构中的一个重要指标。有些方法本身就具有幂等性,例如，将订单更新为待支付状态。更多的方法是不具有幂等性的，例如，订单支付方法。假设系统有订单服务和支付服务，付款时，订单服务就需要调用支付服务的支付方法，如果订单服务发送支付请求成功，支付服务也如预期的那样支付完成了，但支付服务在向订单服务反馈时出现了网络故障，导致订单服务支付出现异常，此时如果系统有重复调用的机制，那么就需要确保再次调用支付服务是不会出现重复支付的情况，因此我们就需要通过其他方式来确保此支付方法具有幂等性效果（伪幂等性）。</p>
+<p>通过完成以下工作就可以让非幂等性方法具有幂等性效果：</p>
+<ul>
+<li>构建一个全局的服务不重复请求序号生成器</li>
+<li>跨服务请求前要生成一个请求序号并传递给被请求的服务</li>
+<li>非幂等性的服务方法在执行成功后保存执行结果</li>
+<li>重复访问服务时需带上第一次访问时生成的请求序号</li>
+<li>服务被访问时，通过请求序号验证是否已访问并有执行结果，如果是，那么直接返回执行结果，否则执行业务、保存执行结果并返回</li>
+</ul>
+<h2 id="可靠事件模式"><a href="#可靠事件模式" class="headerlink" title="可靠事件模式"></a>可靠事件模式</h2><p>此模式属于事件驱动架构，当某件重要事情发生时，例如创建订单，微服务会向消息代理发布一个订单支付事件。消息代理会向订阅事件的微服务推送事件，当订阅这些事件的微服务接收此事件时，就可以完成自己的业务，同时此业务也可能会发布其他的事件。</p>
+<p>可靠事件模式在于保证可靠事件投递和避免重复消费，可靠事件投递需要保证每个服务原子性的业务操作和发布事件，以及确保事件传递至少一次。这些我们需要借助消息代理（<code>Message Broker</code>）来完成，现在一些流行<code>MQ</code>，例如<code>ActiveMQ</code>、<code>RabbitMQ</code>等都支持消息的持久化，以及最少一次语义模式。避免重复消费则需要确保服务的幂等性。</p>
+<pre><code class="java"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">trans</span><span class="params">()</span></span>{
+    <span class="keyword">try</span>{
+        <span class="comment">//1、操作数据库</span>
+        <span class="keyword">boolean</span> result = dao.update(model);<span class="comment">//操作数据库失败会抛出异常</span>
+
+        <span class="comment">//2、如果第一步成功，则投递消息。</span>
+        <span class="keyword">if</span> (result) {
+            mq.append(model);<span class="comment">//如果投递消息失败，方法会抛出异常</span>
+        }    
+    } <span class="keyword">catch</span>(Exception ex) {
+        rollback();<span class="comment">//异常回滚</span>
+    }
+}
+</code></pre>
+<p>根据上述代码及注释，初看可能出现 3 种情况:</p>
+<ul>
+<li>操作数据库成功，向消息代理投递事件也成功。</li>
+<li>操作数据库失败，不会向消息代理中投递事件了。</li>
+<li>操作数据库成功，但是向消息代理中投递事件时失败，向外抛出了异常，刚刚执行的更新数据库的操作将被回滚。 </li>
+</ul>
+<p>从上面分析的几种情况来看，貌似没有问题。但是仔细分析不难发现缺陷所在，在上面的处理过程中存在一段隐患时间窗口。<br><img src="xlt_01.png" alt="服务序列1"><br>服务 <code>A</code> 投递事件的时候可能消息代理已经处理成功，但是返回响应的时候网络异常，导致 <code>append</code> 操作抛出异常。最终结果是事件被投递，数据库却被回滚。<br><img src="xlt_02.png" alt="服务序列2"><br>在投递完成后到数据库 <code>commit</code> 操作之间如果微服务 <code>A</code> 宕机也将造成数据库操作因为连接异常关闭而被回滚。最终结果还是事件被投递，数据库却被回滚。这个实现往往运行很长时间都没有出过问题，但是一旦出现了将会让人感觉莫名，很难发现问题所在。</p>
+<p>下面给出两种可靠事件投递的实现方式。</p>
+<h3 id="本地事件表"><a href="#本地事件表" class="headerlink" title="本地事件表"></a>本地事件表</h3><p>本地事件表方法将事件和业务数据保存在同一个数据库中，使用一个额外的“事件恢复”服务来恢复事件，由本地事务保证更新业务和发布事件的原子性。考虑到事件恢复可能会有一定的延时，服务在完成本地事务后可立即向消息代理发布一个事件。</p>
+<ul>
+<li>服务在同一个本地事务记录业务数据和事件</li>
+<li>服务实施发布一个事件立即通知关联业务服务，如果事件发布成功立刻删除记录的事件</li>
+<li>事件恢复服务定时从事件表中恢复未发布成功的事件，重新发布成功后删除记录的事件</li>
+</ul>
+<p>本地事件表方式有比较明显的缺陷，例如会导致业务系统和事件系统耦合紧密，额外的事件操作也会给数据库带来压力。</p>
+<h3 id="外部事件表"><a href="#外部事件表" class="headerlink" title="外部事件表"></a>外部事件表</h3><p>外部事件表方法将事件持久化到外部的事件系统，事件系统需提供实时事件服务以接受微服务发布事件，同时事件系统还需要提供事件恢复服务来确认和恢复事件。</p>
+<ul>
+<li>业务服务在事务提交前，通过实时事件服务向事件系统请求发送事件，事件系统只记录事件并不真正发送。</li>
+<li>业务服务在提交后，通过实时事件服务向事件系统确认发送，事件得到确认后事件系统才真正发布事件到消息代理。</li>
+<li>业务服务在业务回滚时，通过实时事件向事件系统取消事件。</li>
+<li>如果业务服务在发送确认或取消之前停止服务了怎么办呢？事件系统的事件恢复服务会定期找到未确认发送的事件向业务服务查询状态，根据业务服务返回的状态决定事件是要发布还是取消。</li>
+</ul>
+<p>该方式将业务系统和事件系统独立解耦，都可以独立伸缩。但是这种方式需要一次额外的发送操作，并且需要发布者提供额外的查询接口。</p>
+<h2 id="业务补偿模式"><a href="#业务补偿模式" class="headerlink" title="业务补偿模式"></a>业务补偿模式</h2><p>补偿模式使用一个额外的协调服务来协调各个需要保证一致性的服务，协调服务按顺序调用各个服务，如果某个服务调用异常（包括业务异常和技术异常）就通过执行与业务方法对应的补偿过程取消之前所有已经调用成功的服务。补偿模式建议仅用于不能避免出现业务异常的情况，如果有可能应该优化业务模式，以避免要求补偿事务。如账户余额不足的业务异常可通过预先冻结金额的方式避免，商品库存不足可要求商家准备额外的库存等。</p>
+<p>对于一个通用的补偿框架来说，预先知道服务需要记录的业务要素是不可能的，因此我们就需要通过设计一些表来记录所有业务执行的流水。补偿过程作为一个服务调用过程同样存在调用不成功的情况，这个时候需要通过重试的机制来保证补偿的成功率。当然这也就要求补偿操作本身具备幂等性。</p>
+<h2 id="两阶段提交模式"><a href="#两阶段提交模式" class="headerlink" title="两阶段提交模式"></a>两阶段提交模式</h2><p><code>Two Phrase Commit Protocol</code>，简称<code>2PC</code>，翻译成中文即“两阶段提交协议”，这是处理分布式事务的最常见协议。<br>在此协议中，一个或多个资源管理器的活动均由一个称为事务管理器的应用组件来控制。此协议分为两个阶段：</p>
+<ul>
+<li>投票阶段:<br>事务管理器给每个参与者(资源管理器)发送<code>Prepare</code>消息，参与者执行事务<code>commit</code>前的准备工作（例如，执行业务并将结果写如本地的<code>redo</code>和<code>undo</code>日志），根据自身的情况判断是否允许<code>commit</code>并向事务管理器发起投票。</li>
+<li>提交阶段:<br>只要事务管理器在规定时间内未收到所有投票或者其中有一个反对票，那么它将给每个参与者发送回滚(<code>Rollback</code>)消息或者不发送让各参与者超时自动<code>rollback</code>，否则，它将发送提交(<code>Commit</code>)消息，参与者根据事务管理器的指令执行提交或者回滚操作，释放所有事务处理过程中使用的锁资源。</li>
+</ul>
+<p>基于<code>2PC</code>，我们常见的有以下两种分布式事务处理方案，他们分别<code>XA模式</code>和<code>TCC模式</code>，其中<code>XA模式</code>用于解决分布式存储的数据一致性问题，<code>TCC</code>用于解决分布式服务的数据一致性问题。</p>
+<h3 id="XA模式（数据库2PC）"><a href="#XA模式（数据库2PC）" class="headerlink" title="XA模式（数据库2PC）"></a>XA模式（数据库2PC）</h3><p><code>XA</code>协议由<code>Tuxedo</code>首先提出的，并交给<code>X/Open</code>组织，作为资源管理器（数据库）与事务管理器的接口标准。目前，<code>Oracle</code>、<code>Informix</code>、<code>DB2</code>、<code>Sybase</code>和<code>MySql</code>等各大数据库厂家都提供对<code>XA</code>的支持。<code>XA</code>协议采用<code>2PC</code>的方式来管理分布式事务。<code>XA</code>接口提供资源管理器与事务管理器之间进行通信的标准接口。</p>
+<p><code>JTA</code>是<code>Java Transaction API</code>简称，即<code>Java</code>事务管理器规范，主要用于管理本地事务，如果想让<code>JTA</code>管理多台数据库操作的分布式事务，那么就需要<code>XA</code>支持。需要注意的是，<code>Spring</code>提供了<code>JTA</code>介入方式，但是没有提供<code>JTA</code>实现，<code>JTA</code>的实现由容器来完成，例如<code>jboss</code>、<code>weblogic</code>、<code>websphere</code>等,我们常用的<code>tomcat</code>并没有进行实现，但我们可以借助其插件<code>jotm</code>或<code>atomikos</code>实现<code>JTA</code>。</p>
+<h3 id="TCC模式（应用2PC）"><a href="#TCC模式（应用2PC）" class="headerlink" title="TCC模式（应用2PC）"></a>TCC模式（应用2PC）</h3><p><code>TCC</code>，全称<code>Try-Comfirm-Cancle</code>，它是基于应用层的<code>2PC</code>。一个完整的<code>TCC</code>有一个主业务服务和若干个从业务服务，<code>TCC</code>模式要求从业务服务提供三个接口：<code>Try</code>、<code>Confirm</code>和<code>Cancle</code>。</p>
+<ul>
+<li><code>Try</code>:完成所有的业务检查并预留必须的业务资源。</li>
+<li><code>Confirm</code>:执行业务（不进行任何检查），且只使用<code>Try</code>阶段预留的业务资源，另外，<code>Confirm</code>操作需要满足幂等性(调用失败后，允许重新调用)。</li>
+<li><code>Cancle</code>：释放<code>Try</code>阶段锁定的业务资源，<code>Cancle</code>操作需要满足幂等性(调用失败后，允许重新调用)。</li>
+</ul>
+<p><img src="tcc.png" alt="TCC模式"><br>TCC模式理论上可以很好的解决分布式数据一致性问题，但它也存以下几个问题：</p>
+<ul>
+<li>如果某个服务请求被阻塞，那么所有的服务请求将被阻塞，当然，我们可以通过超时设置来避免此问题；</li>
+<li>如果事务管理器出现故障，那么所有的分布式请求将无法执行；</li>
+<li>一次远程请求需要多次与事务管理器进行通信，请求中涉及的服务越多，通信次数越多，因此高并发的系统中，与事务管理器的通信会从很大程度上影响系统性能，因此高并发系统选用此模式时需慎重；</li>
+</ul>
+<h2 id="无状态服务机制"><a href="#无状态服务机制" class="headerlink" title="无状态服务机制"></a>无状态服务机制</h2><p>服务不进行持久化，即服务方法执行完后返回数据，最终是否持久化由最原始的调用者或统一构建的持久化服务决定和操作。</p>
+<h2 id="如何选择解决方案"><a href="#如何选择解决方案" class="headerlink" title="如何选择解决方案"></a>如何选择解决方案</h2><ul>
+<li>原则1：避免分布式事务</li>
+<li>原则2：优先选择最终一致性方案，即可靠事件模式</li>
+<li>原则3：最后选择两阶段提交法</li>
+<li>原则4：如无必要，不要选择事务补偿机制</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/事务/" rel="tag"># 事务</a>
+          
+            <a href="/tags/分布式/" rel="tag"># 分布式</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/21/java-native方法/" rel="next" title="java native方法">
+                <i class="fa fa-chevron-left"></i> java native方法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/29/理解面向对象/" rel="prev" title="理解面向对象">
+                理解面向对象 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div onclick="showGitment()" id="gitment-display-button">显示 Gitment 评论</div>
+        <div id="gitment-container" style="display:none"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/gougou.jpg"
+                alt="鸡哥" />
+            
+              <p class="site-author-name" itemprop="name">鸡哥</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/jiges" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i></a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:ccr12312@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i></a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#共享资源与并发"><span class="nav-number">1.</span> <span class="nav-text">共享资源与并发</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#更新丢失"><span class="nav-number">1.1.</span> <span class="nav-text">更新丢失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#脏读"><span class="nav-number">1.2.</span> <span class="nav-text">脏读</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不可重复读"><span class="nav-number">1.3.</span> <span class="nav-text">不可重复读</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#幻象读"><span class="nav-number">1.4.</span> <span class="nav-text">幻象读</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#事务"><span class="nav-number">2.</span> <span class="nav-text">事务</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是事务？"><span class="nav-number">2.1.</span> <span class="nav-text">什么是事务？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务有哪些特性？"><span class="nav-number">2.2.</span> <span class="nav-text">事务有哪些特性？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#衡量并发事务正确执行的标准是什么？"><span class="nav-number">2.3.</span> <span class="nav-text">衡量并发事务正确执行的标准是什么？</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#事务管理"><span class="nav-number">3.</span> <span class="nav-text">事务管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#排它锁与共享锁"><span class="nav-number">3.1.</span> <span class="nav-text">排它锁与共享锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务一致性解决方案"><span class="nav-number">3.2.</span> <span class="nav-text">事务一致性解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#悲观锁"><span class="nav-number">3.2.1.</span> <span class="nav-text">悲观锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#乐观锁"><span class="nav-number">3.2.2.</span> <span class="nav-text">乐观锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#时标控制"><span class="nav-number">3.2.3.</span> <span class="nav-text">时标控制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#锁协议"><span class="nav-number">3.2.4.</span> <span class="nav-text">锁协议</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#封锁后遗症"><span class="nav-number">3.3.</span> <span class="nav-text">封锁后遗症</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是活锁？"><span class="nav-number">3.3.1.</span> <span class="nav-text">什么是活锁？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是死锁？"><span class="nav-number">3.3.2.</span> <span class="nav-text">什么是死锁？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何解决死锁问题呢？"><span class="nav-number">3.3.3.</span> <span class="nav-text">如何解决死锁问题呢？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#嵌套事务管理"><span class="nav-number">3.4.</span> <span class="nav-text">嵌套事务管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库隔离级别"><span class="nav-number">3.5.</span> <span class="nav-text">数据库隔离级别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Web项目事务管理"><span class="nav-number">4.</span> <span class="nav-text">Web项目事务管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Hibernate声明式事务"><span class="nav-number">4.1.</span> <span class="nav-text">Spring + Hibernate声明式事务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Hibernate-注解式事务"><span class="nav-number">4.2.</span> <span class="nav-text">Spring + Hibernate 注解式事务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hibernate锁模式"><span class="nav-number">4.3.</span> <span class="nav-text">Hibernate锁模式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#分布式事务管理"><span class="nav-number">5.</span> <span class="nav-text">分布式事务管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#分布式"><span class="nav-number">5.1.</span> <span class="nav-text">分布式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#远程通信方式"><span class="nav-number">5.1.1.</span> <span class="nav-text">远程通信方式:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#远程通信语义"><span class="nav-number">5.1.2.</span> <span class="nav-text">远程通信语义:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是方法的幂等性？"><span class="nav-number">5.1.3.</span> <span class="nav-text">什么是方法的幂等性？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可靠事件模式"><span class="nav-number">5.2.</span> <span class="nav-text">可靠事件模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#本地事件表"><span class="nav-number">5.2.1.</span> <span class="nav-text">本地事件表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#外部事件表"><span class="nav-number">5.2.2.</span> <span class="nav-text">外部事件表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#业务补偿模式"><span class="nav-number">5.3.</span> <span class="nav-text">业务补偿模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#两阶段提交模式"><span class="nav-number">5.4.</span> <span class="nav-text">两阶段提交模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#XA模式（数据库2PC）"><span class="nav-number">5.4.1.</span> <span class="nav-text">XA模式（数据库2PC）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCC模式（应用2PC）"><span class="nav-number">5.4.2.</span> <span class="nav-text">TCC模式（应用2PC）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#无状态服务机制"><span class="nav-number">5.5.</span> <span class="nav-text">无状态服务机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何选择解决方案"><span class="nav-number">5.6.</span> <span class="nav-text">如何选择解决方案</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">鸡哥</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'jiges',
+            repo: 'jiges.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '3bfafe08bfcef158878f09910c6a9f2aef7391de',
+            
+                client_id: 'c41b93a72f2b21dcc1ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      function showGitment(){
+        document.getElementById("gitment-display-button").style.display = "none";
+        document.getElementById("gitment-container").style.display = "block";
+        renderGitment();
+      }
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("paa9xqTl09B7K7pJzx3tI8A7-gzGzoHsz", "Tt2YuM3CWPcI5gNeGiQR9qeh");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

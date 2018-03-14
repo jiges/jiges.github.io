@@ -1,0 +1,2067 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="java,jni," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="不要给自己找到不学习的理由  概述JNI（Java Native Interface,Java本地接口）是一种编程框架,使得Java虚拟机中的Java程序可以调用本地应用/或库,也可以被其他程序调用。本地程序一般是用其它语言（C、C++或汇编语言等）编写的, 并且被编译为基于本机硬件和操作系统的程序。">
+<meta name="keywords" content="java,jni">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java native方法">
+<meta property="og:url" content="https://jiges.github.io/2017/11/21/java-native方法/index.html">
+<meta property="og:site_name" content="鸡哥の博客">
+<meta property="og:description" content="不要给自己找到不学习的理由  概述JNI（Java Native Interface,Java本地接口）是一种编程框架,使得Java虚拟机中的Java程序可以调用本地应用/或库,也可以被其他程序调用。本地程序一般是用其它语言（C、C++或汇编语言等）编写的, 并且被编译为基于本机硬件和操作系统的程序。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://jiges.github.io/2017/11/21/java-native方法/开发流程.png">
+<meta property="og:updated_time" content="2017-11-23T10:53:31.994Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="java native方法">
+<meta name="twitter:description" content="不要给自己找到不学习的理由  概述JNI（Java Native Interface,Java本地接口）是一种编程框架,使得Java虚拟机中的Java程序可以调用本地应用/或库,也可以被其他程序调用。本地程序一般是用其它语言（C、C++或汇编语言等）编写的, 并且被编译为基于本机硬件和操作系统的程序。">
+<meta name="twitter:image" content="https://jiges.github.io/2017/11/21/java-native方法/开发流程.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://jiges.github.io/2017/11/21/java-native方法/"/>
+
+
+
+
+
+  <title>java native方法 | 鸡哥の博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">鸡哥の博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/index.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://jiges.github.io/2017/11/21/java-native方法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="鸡哥">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/gougou.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鸡哥の博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">java native方法</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-21T10:17:38+08:00">
+                2017-11-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java源码阅读/" itemprop="url" rel="index">
+                    <span itemprop="name">java源码阅读</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/11/21/java-native方法/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/11/21/java-native方法/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/11/21/java-native方法/" class="leancloud_visitors" data-flag-title="java native方法">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>不要给自己找到不学习的理由</p>
+</blockquote>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>JNI（Java Native Interface,Java本地接口）是一种编程框架,使得Java虚拟机中的Java程序可以调用本地应用/或库,也可以被其他程序调用。本地程序一般是用其它语言（C、C++或汇编语言等）编写的, 并且被编译为基于本机硬件和操作系统的程序。<br><a id="more"></a></p>
+<p>我们知道，java标准库不支持的平台相关功能或者程序库，JNI允许程序员用其他编程语言来解决用纯粹的Java代码不好处理的情况，说白了java是高级的语言，纯粹的代码语言，不能直接和系统硬件对接，必须借助JNI来实现和平台系统的对接。许多基于JNI的标准库提供了很多功能给程序员使用, 例如文件I/O、音频相关的功能等。</p>
+<blockquote>
+<p>关于JNI的解释，百度google一大堆，笔者可自行去理解。本文只是说明<code>JVM</code>是如何调用<code>native方法</code>的。</p>
+</blockquote>
+<h1 id="陷阱与诱惑"><a href="#陷阱与诱惑" class="headerlink" title="陷阱与诱惑"></a><a href="https://zh.wikipedia.org/wiki/Java%E6%9C%AC%E5%9C%B0%E6%8E%A5%E5%8F%A3" target="_blank" rel="noopener">陷阱与诱惑</a></h1><ul>
+<li>在使用JNI的过程中,可能因为某些微小的BUG,对整个JVM造成很难重现和调试的错误。</li>
+<li>依赖于JNI的应用失去了Java的平台移植性（一种解决办法是为每个平台编写专门的JNI代码，然后在Java代码中,根据操作系统载入正确的JNI代码）。</li>
+<li>JNI框架并没有对 non-JVM 内存提供自动垃圾回收机制, Native代码(如汇编语言)分配的内存和资源，需要其自身负责进行显式的释放。</li>
+<li>JNI在某些情况下可能带来很大的开销和性能损失。<ul>
+<li>调用 JNI 方法是很笨重的操作, 特别是在多次重复调用的情况下。</li>
+<li>Native 方法不会被 JVM 内联, 也不会被 JIT compiled 优化 , 因为方法已经被编译过了。</li>
+<li>Java 数组可能会被拷贝一份,以传递给 native 方法, 执行完之后再拷贝回去. 其开销与数组的长度是线性相关的.</li>
+<li>如果传递一个对象给方法,或者需要一个回调,那么 Native 方法可能会自己调用JVM。 访问Java对象的属性、方法和类型时, Native代码需要类似reflection的东西。签名由字符串指定,通从JVM中查询。这非常缓慢并且容易出错。</li>
+<li>Java 中的字符串(String) 也是对象, 有 length 属性,并且是编码过的. 读取或者创建字符串都需要一次时间复杂度为 O(n) 的复制操作.</li>
+</ul>
+</li>
+</ul>
+<h1 id="JNI开发流程"><a href="#JNI开发流程" class="headerlink" title="JNI开发流程"></a>JNI开发流程</h1><blockquote>
+<p>参考<a href="http://wiki.jikexueyuan.com/project/jni-ndk-developer-guide/workflow.html" target="_blank" rel="noopener">极客学院JNI开发流程</a></p>
+</blockquote>
+<p>开发 JNI 程序会受到系统环境的限制，因为用 <code>C/C++</code> 语言写出来的代码或模块，编译过程当中要依赖当前操作系统环境所提供的一些库函数，并和本地库链接在一起。而且编译后生成的二进制代码只能在本地操作系统环境下运行，因为不同的操作系统环境，有自己的本地库和 CPU 指令集，而且各个平台对标准 <code>C/C++</code> 的规范和标准库函数实现方式也有所区别。这就造成使用了 JNI 接口的 JAVA 程序，不再像以前那样自由的跨平台。如果要实现跨平台，就必须将本地代码在不同的操作系统平台下编译出相应的动态库。<br>JNI 开发流程主要分为以下 6 步： </p>
+<ul>
+<li>编写声明了 native 方法的 Java 类。</li>
+<li>将 Java 源代码编译成 class 字节码文件</li>
+<li>用 javah -jni 命令生成.h头文件（javah 是 jdk 自带的一个命令，-jni 参数表示将 class 中用native 声明的函数生成 JNI 规则的函数）</li>
+<li>用本地代码实现.h头文件中的函数</li>
+<li>将本地代码编译成动态库（Windows：*.dll，linux/unix：*.so，mac os x：*.jnilib）</li>
+<li>拷贝动态库至 java.library.path 本地库搜索目录下，并运行 Java 程序  </li>
+</ul>
+<p><img src="开发流程.png" alt="开发流程"></p>
+<h2 id="开发HelloWorld程序"><a href="#开发HelloWorld程序" class="headerlink" title="开发HelloWorld程序"></a>开发HelloWorld程序</h2><blockquote>
+<p>以在linux环境下开发编译为例  </p>
+</blockquote>
+<h3 id="编写声明了-native-方法的-Java-类"><a href="#编写声明了-native-方法的-Java-类" class="headerlink" title="编写声明了 native 方法的 Java 类"></a>编写声明了 native 方法的 Java 类</h3><pre><code class="java"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloJNI</span> </span>{
+
+    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">native</span> String <span class="title">sayHello</span><span class="params">(String name)</span></span>; <span class="comment">// 1.声明这是一个native函数，由本地代码实现</span>
+
+    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>{
+        String text = sayHello(<span class="string">"hello jni"</span>);  <span class="comment">// 3.调用本地函数</span>
+        System.out.println(<span class="string">"Hello,I'm java,the return String is : "</span> + text);
+    }
+
+    <span class="keyword">static</span> {
+        System.loadLibrary(<span class="string">"HelloJNI"</span>);   <span class="comment">// 2.加载实现了native函数的动态库，只需要写动态库的名字</span>
+    }
+}
+</code></pre>
+<h3 id="编译class文件"><a href="#编译class文件" class="headerlink" title="编译class文件"></a>编译class文件</h3><pre><code class="java">$  /home/ccr/jdk1.7.0_80/bin/javac -cp /home/ccr/jdk1.7.0_80/jre/lib/rt.jar HelloJNI.java
+</code></pre>
+<h3 id="生成-h头文件"><a href="#生成-h头文件" class="headerlink" title="生成.h头文件"></a>生成.h头文件</h3><p><code>.h头文件</code>可以类比java接口类去理解。<code>.h</code>中一般放的是同名<code>.c</code>文件中定义的变量、数组、函数的声明，需要让<code>.c</code>外部使用的声明。头文件中只是申明变量函数，具体的初始化和实现放在同名<code>.c</code>文件或<code>.cpp</code>文件中。</p>
+<pre><code class="java">$  /home/ccr/jdk1.7.0_80/bin/javah -jni -d ./jni HelloJNI
+</code></pre>
+<p>参数说明:</p>
+<ul>
+<li><code>classpath</code>：类搜索路径，这里表示从当前的 bin 目录下查找</li>
+<li><code>d</code>：将生成的头文件放到当前的 jni 目录下</li>
+<li><code>o</code>： 指定生成的头文件名称，默认以类全路径名生成（包名+类名.h）</li>
+</ul>
+<blockquote>
+<p>注意：<code>-d</code>和<code>-o</code>只能使用其中一个参数。</p>
+</blockquote>
+<p>生成的头文件<code>jni/HelloJNI.h</code></p>
+<pre><code class="c++">/- DO NOT EDIT THIS FILE - it is machine generated */
+<span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;jni.h&gt;</span></span>
+/- Header <span class="keyword">for</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloJNI</span> */</span>
+<span class="class"></span>
+<span class="class">#<span class="title">ifndef</span> _<span class="title">Included_HelloJNI</span></span>
+<span class="class">#<span class="title">define</span> _<span class="title">Included_HelloJNI</span></span>
+<span class="class">#<span class="title">ifdef</span> __<span class="title">cplusplus</span></span>
+<span class="class"><span class="title">extern</span> "<span class="title">C</span>" {</span>
+<span class="meta">#<span class="meta-keyword">endif</span></span>
+<span class="comment">/*</span>
+<span class="comment"> - Class:     HelloJNI</span>
+<span class="comment"> - Method:    sayHello</span>
+<span class="comment"> - Signature: (Ljava/lang/String;)Ljava/lang/String;</span>
+<span class="comment"> */</span>
+JNIEXPORT jstring JNICALL Java_HelloJNI_sayHello
+  (JNIEnv *, jclass, jstring);
+
+<span class="meta">#<span class="meta-keyword">ifdef</span> __cplusplus</span>
+}
+<span class="meta">#<span class="meta-keyword">endif</span></span>
+<span class="meta">#<span class="meta-keyword">endif</span></span>
+</code></pre>
+<h3 id="实现头文件中申明的函数"><a href="#实现头文件中申明的函数" class="headerlink" title="实现头文件中申明的函数"></a>实现头文件中申明的函数</h3><p>编辑<code>HelloJNI.c</code></p>
+<pre><code class="c"><span class="comment">// HelloJNI.c</span>
+<span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;HelloJNI.h&gt;</span></span>
+/- Header <span class="keyword">for</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloJNI</span> */</span>
+<span class="class"></span>
+<span class="class">#<span class="title">ifdef</span> __<span class="title">cplusplus</span>  </span>
+<span class="class"><span class="title">extern</span> "<span class="title">C</span>"  </span>
+<span class="class">{</span>  
+<span class="meta">#<span class="meta-keyword">endif</span>  </span>
+<span class="comment">/*</span>
+<span class="comment"> - Class:     HelloJNI</span>
+<span class="comment"> - Method:    sayHello</span>
+<span class="comment"> - Signature: (Ljava/lang/String;)Ljava/lang/String;</span>
+<span class="comment"> */</span>
+JNIEXPORT jstring JNICALL Java_HelloJNI_sayHello
+  (JNIEnv *env, jclass cls, jstring j_str)
+  {  
+    <span class="keyword">const</span> <span class="keyword">char</span> *c_str = <span class="literal">NULL</span>;  
+    <span class="keyword">char</span> buff[<span class="number">128</span>] = { <span class="number">0</span> };  
+    c_str = (*env)-&gt;GetStringUTFChars(env, j_str, <span class="literal">NULL</span>);  
+    <span class="keyword">if</span> (c_str == <span class="literal">NULL</span>)  
+    {  
+        <span class="built_in">printf</span>(<span class="string">"out of memory.\n"</span>);  
+        <span class="keyword">return</span> <span class="literal">NULL</span>;  
+    }  
+    (*env)-&gt;ReleaseStringUTFChars(env, j_str, c_str);  
+    <span class="built_in">printf</span>(<span class="string">"Hello,I'm C++,the Java Str is:%s\n"</span>, c_str); 
+    <span class="built_in">sprintf</span>(buff, <span class="string">"hello %s"</span>, c_str);  
+    <span class="keyword">return</span> (*env)-&gt;NewStringUTF(env, buff);  
+}  
+
+<span class="meta">#<span class="meta-keyword">ifdef</span> __cplusplus  </span>
+}  
+<span class="meta">#<span class="meta-keyword">endif</span></span>
+</code></pre>
+<h3 id="编译C文件"><a href="#编译C文件" class="headerlink" title="编译C文件"></a>编译C文件</h3><p>将 <code>C/C++</code> 代码编译成本地动态库文件动态库文件名命名规则：lib+动态库文件名+后缀（操作系统不一样，后缀名也不一样）如：</p>
+<ul>
+<li><code>Mac OS X</code> : <code>libHelloJNI.jnilib</code></li>
+<li><code>Windows</code> ：<code>HelloJNI.dll</code>（不需要 <code>lib</code> 前缀）</li>
+<li><code>Linux/Unix</code>：<code>libHelloJNI.so</code></li>
+</ul>
+<p>以在linux环境下编译为例</p>
+<pre><code class="c">$  gcc -I$JAVA_HOME/include -I$JAVA_HOME/include/linux -fPIC -shared HelloJNI.c -o libHelloJNI.so
+</code></pre>
+<p>参数说明：</p>
+<ul>
+<li><code>-I</code>： 包含编译JNI必要的头文件</li>
+<li><code>-fPIC</code>： 编译成与位置无关的独立代码</li>
+<li><code>-shared</code>：编译成动态库</li>
+<li><code>-o</code>： 指定编译后动态库生成的路径和文件名</li>
+</ul>
+<p>用<code>-I</code>参数包含了 <code>JDK</code> 安装目录下的两个头文件目录，其中第一个目录为<code>jni.h头文件</code>所在目录，第二个是跨平台头文件目录（<code>Mac os x</code>系统下的目录名为 <code>darwin</code>，在 <code>Windows</code> 下目录名为 <code>win32</code>，<code>linux</code> 下目录名为 <code>linux</code>）,<br>用于定义与平台相关的宏，其中用于标识函数用途的两个宏 <code>JNIEXPORT</code> 和 <code>JNICALL</code>，就定义在 <code>linux</code> 目录下的<code>jni_md.h头文件</code>中。在 <code>Windows</code> 中编译 <code>dll</code> 动态库规定，如果动态库中的函数要被外部调用，需要在函数声明中添加<code>__declspec(dllexport)</code>标识，表示将该函数导出在外部可以调用。在 Linux/Unix 系统中，这两个宏可以省略不加。这两个平台的区别是由于各自的编译器所产生的可执行文件格式不一样。<br><code>JNICALL</code> 在 <code>Windows</code> 中的值为<code>__stdcall</code>，用于约束函数入栈顺序和堆栈清理的规则。<br>Windows 下<code>jni_md.h</code>头文件内容：</p>
+<pre><code class="c++"><span class="meta">#<span class="meta-keyword">ifndef</span> _JAVASOFT_JNI_MD_H_</span>
+<span class="meta">#<span class="meta-keyword">define</span> _JAVASOFT_JNI_MD_H_</span>
+
+<span class="meta">#<span class="meta-keyword">define</span> JNIEXPORT __declspec(dllexport)</span>
+<span class="meta">#<span class="meta-keyword">define</span> JNIIMPORT __declspec(dllimport)</span>
+<span class="meta">#<span class="meta-keyword">define</span> JNICALL __stdcall</span>
+
+<span class="keyword">typedef</span> <span class="keyword">long</span> jint;
+<span class="keyword">typedef</span> __int64 jlong;
+<span class="keyword">typedef</span> <span class="keyword">signed</span> <span class="keyword">char</span> jbyte;
+
+<span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">/* !_JAVASOFT_JNI_MD_H_ */</span></span>
+</code></pre>
+<p>Linux 下<code>jni_md.h</code>头文件内容：</p>
+<pre><code class="c++"><span class="meta">#<span class="meta-keyword">ifndef</span> _JAVASOFT_JNI_MD_H_  </span>
+<span class="meta">#<span class="meta-keyword">define</span> _JAVASOFT_JNI_MD_H_  </span>
+
+<span class="meta">#<span class="meta-keyword">define</span> JNIEXPORT  </span>
+<span class="meta">#<span class="meta-keyword">define</span> JNIIMPORT  </span>
+<span class="meta">#<span class="meta-keyword">define</span> JNICALL  </span>
+
+<span class="keyword">typedef</span> <span class="keyword">int</span> jint;  
+<span class="meta">#<span class="meta-keyword">ifdef</span> _LP64 <span class="comment">/* 64-bit Solaris */</span>  </span>
+<span class="keyword">typedef</span> <span class="keyword">long</span> jlong;  
+<span class="meta">#<span class="meta-keyword">else</span>  </span>
+<span class="keyword">typedef</span> <span class="keyword">long</span> <span class="keyword">long</span> jlong;  
+<span class="meta">#<span class="meta-keyword">endif</span>  </span>
+
+<span class="keyword">typedef</span> <span class="keyword">signed</span> <span class="keyword">char</span> jbyte;  
+
+<span class="meta">#<span class="meta-keyword">endif</span></span>
+</code></pre>
+<p>从 <code>Linux</code> 下的<code>jni_md.h</code>头文件可以看出来，<code>JNIEXPORT</code> 和 <code>JNICALL</code> 是一个空定义，所以在 <code>Linux</code> 下 <code>JNI</code> 函数声明可以省略这两个宏。<br>用 javah 工具生成函数原型的头文件，函数命名规则为：<code>Java_类全路径_方法名</code>。如<code>Java_HelloJNI_sayHello</code>，其中<code>Java_</code>是函数的前缀，<code>HelloJNI</code>是类名(包含包路径用下划线如:<code>com_test_类名</code>)，<code>sayHello</code>是方法名，它们之间用 <code>_(下划线)</code> 连接。<br>再来看看函数的几个参数：</p>
+<pre><code class="c++">JNIEXPORT jstring JNICALL Java_HelloJNI_sayHello
+  (JNIEnv *, jclass, jstring);
+</code></pre>
+<ul>
+<li>第一个参数：JNIEnv* 是定义任意 native 函数的第一个参数（包括调用 JNI 的 RegisterNatives 函数注册的函数），指向 JVM 函数表的指针，函数表中的每一个入口指向一个 JNI 函数，每个函数用于访问 JVM 中特定的数据结构。</li>
+<li>第二个参数：调用 Java 中 native 方法的实例或 Class 对象，如果这个 native 方法是实例方法，则该参数是 jobject，如果是静态方法，则是 jclass。</li>
+<li>第三个参数：Java 对应 JNI 中的数据类型，Java 中 String 类型对应 JNI 的 jstring 类型。（详细介绍 JAVA 与 JNI 数据类型的映射关系参考<a href="http://wiki.jikexueyuan.com/project/jni-ndk-developer-guide/relational.html" target="_blank" rel="noopener">极客学院</a>）。</li>
+</ul>
+<p>函数返回值类型：夹在 JNIEXPORT 和 JNICALL 宏中间的 jstring，表示函数的返回值类型，对应 Java 的String 类型。</p>
+<h3 id="运行-Java-程序"><a href="#运行-Java-程序" class="headerlink" title="运行 Java 程序"></a>运行 Java 程序</h3><pre><code class="c">$  /home/ccr/jdk1<span class="number">.7</span><span class="number">.0</span>_80/bin/java HelloJNI
+</code></pre>
+<p>Java 在调用 native (本地)方法之前，需要先加载动态库。如果在未加载动态之前就调用 native 方法，会抛出找不到动态链接库文件的异常。如下所示:</p>
+<pre><code class="java">Exception in thread <span class="string">"main"</span> java.lang.UnsatisfiedLinkError: no HelloJNI in java.library.path
+        at java.lang.ClassLoader.loadLibrary(ClassLoader.java:<span class="number">1886</span>)
+        at java.lang.Runtime.loadLibrary0(Runtime.java:<span class="number">849</span>)
+        at java.lang.System.loadLibrary(System.java:<span class="number">1088</span>)
+        at HelloJNI.&lt;clinit&gt;(HelloJNI.java:<span class="number">11</span>)
+</code></pre>
+<p>一般在类的静态（static）代码块中加载动态库最合适，因为在创建类的实例时，类会被 <code>ClassLoader</code> 先加载到虚拟机，随后立马调用类的 <code>static</code> 静态代码块。这时再去调用 <code>native</code> 方法就万无一失了。加载动态库的两种方式：</p>
+<pre><code class="java">System.loadLibrary(<span class="string">"HelloJNI"</span>);  
+System.load(<span class="string">"/home/ccr/jvm/javatest/libHelloJNI.so"</span>);
+</code></pre>
+<ul>
+<li>方式1：只需要指定动态库的名字即可，不需要加lib前缀，也不要加.so、.dll和.jnilib后缀</li>
+<li>方式2：指定动态库的绝对路径名，需要加上前缀和后缀</li>
+</ul>
+<p>如果使用方式1，<code>java</code> 会去 <code>java.library.path</code> 系统属性指定的目录下查找动态库文件，如果没有找到会抛出<code>java.lang.UnsatisfiedLinkError</code> 异常。<br>只需要指定 <code>java.library.path</code> 即可</p>
+<pre><code class="c">$  /home/ccr/jdk1<span class="number">.7</span><span class="number">.0</span>_80/bin/java -Djava.library.path=/home/ccr/jvm/javatest HelloJNI
+</code></pre>
+<h1 id="JVM-查找-native-方法"><a href="#JVM-查找-native-方法" class="headerlink" title="JVM 查找 native 方法"></a>JVM 查找 native 方法</h1><p>调用 <code>native</code> 方法之前，首先要调用 <code>System.loadLibrary</code> 接口加载一个实现了<code>native</code> 方法的动态库才能正常访问，否则就会抛出 <code>java.lang.UnsatisfiedLinkError</code> 异常，找不到 XX 方法的提示。现在我们想想，在 <code>Java</code> 中调用某个 <code>native</code> 方法时，<code>JVM</code> 是通过什么方式，能正确的找到动态库中 <code>C/C++</code> 实现的那个 <code>native</code> 函数呢？  </p>
+<p><code>JVM</code> 查找<code>native</code> 方法有两种方式：</p>
+<ul>
+<li>按照 <code>JNI</code> 规范的命名规则</li>
+<li><p>调用 <code>JNI</code> 提供的 <code>RegisterNatives</code> 函数，将本地函数注册到 <code>JVM</code>中。</p>
+<h2 id="命名规则查找方式"><a href="#命名规则查找方式" class="headerlink" title="命名规则查找方式"></a>命名规则查找方式</h2><h3 id="加载本地库文件"><a href="#加载本地库文件" class="headerlink" title="加载本地库文件"></a>加载本地库文件</h3><h4 id="寻找本地库文件"><a href="#寻找本地库文件" class="headerlink" title="寻找本地库文件"></a>寻找本地库文件</h4><p>上一节中的示例使用的就是第一种方式,调用 <code>System.loadLibrary</code> 接口加载一个实现了<code>native</code> 方法的动态库。让我们来看看<code>System.loadLibrary</code>的具体实现。</p>
+<pre><code class="java"><span class="meta">@CallerSensitive</span>
+<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">loadLibrary</span><span class="params">(String libname)</span> </span>{
+  Runtime.getRuntime().loadLibrary0(Reflection.getCallerClass(), libname);
+}
+</code></pre>
+<p>其中<code>@CallerSensitive</code>这个注解是用来规避漏洞的，有兴趣的童鞋可以研究下，参考链接：<a href="http://blog.h5min.cn/aguda_king/article/details/72355807" target="_blank" rel="noopener">JDK8的@CallerSensitive</a>,<a href="http://m.blog.csdn.net/HEL_WOR/article/details/50199797" target="_blank" rel="noopener">JVM注解@CallSensitive</a>。<br><code>Reflection.getCallerClass()</code>方法返回调用者的类名，这里他返回是 <code>HelloJNI</code>。<br>然后调用 <code>java.lang.Runtime</code> 类中的 <code>loadLibrary0</code> 方法：</p>
+<pre><code class="java"><span class="function"><span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">loadLibrary0</span><span class="params">(Class&lt;?&gt; fromClass, String libname)</span> </span>{
+  SecurityManager security = System.getSecurityManager();
+  <span class="keyword">if</span> (security != <span class="keyword">null</span>) {
+      security.checkLink(libname);
+  }
+  <span class="keyword">if</span> (libname.indexOf((<span class="keyword">int</span>)File.separatorChar) != -<span class="number">1</span>) { <span class="comment">//使用该方法不允许使用绝对路径</span>
+      <span class="keyword">throw</span> <span class="keyword">new</span> UnsatisfiedLinkError(
+<span class="string">"Directory separator should not appear in library name: "</span> + libname);
+  }
+  ClassLoader.loadLibrary(fromClass, libname, <span class="keyword">false</span>);
+}
+</code></pre>
+<p>该方法只是做了一些安全检查，从该方法中可以看出，使用 <code>System.loadLibrary</code> 方法不允许使用绝对路径。最终交给 <code>ClassLoader.loadLibrary</code> 去加载。<br><code>ClassLoader</code> 的 <code>loadLibrary</code> 方法：</p>
+<pre><code class="java"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">loadLibrary</span><span class="params">(Class&lt;?&gt; fromClass, String name, <span class="keyword">boolean</span> isAbsolute)</span> </span>{ 
+
+      ...............
+
+      <span class="comment">//false，System.load("/home/ccr/jvm/javatest/libHelloJNI.so") 该方式最终也进入到此方法，isAbsolute参数是true</span>
+      <span class="keyword">if</span> (isAbsolute) {
+          <span class="keyword">if</span> (loadLibrary0(fromClass, <span class="keyword">new</span> File(name))) {
+              <span class="keyword">return</span>;
+          }
+          <span class="keyword">throw</span> <span class="keyword">new</span> UnsatisfiedLinkError(<span class="string">"Can't load library: "</span> + name);
+      }
+      <span class="comment">//Class Loader找到的绝对路径（class path）下查找，但调试时返回是null，不知何解？</span>
+      <span class="keyword">if</span> (loader != <span class="keyword">null</span>) {
+          String libfilename = loader.findLibrary(name);
+          ...............
+      }
+      <span class="comment">//尝试在sun.boot.library.path 定义的目录下查找</span>
+      <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span> ; i &lt; sys_paths.length ; i++) {
+          File libfile = <span class="keyword">new</span> File(sys_paths[i], System.mapLibraryName(name));
+          <span class="keyword">if</span> (loadLibrary0(fromClass, libfile)) {
+              <span class="keyword">return</span>;
+          }
+          <span class="comment">//备用位置，大部分平台都没实现，所以实现里面直接返回了null</span>
+          libfile = ClassLoaderHelper.mapAlternativeName(libfile);
+          <span class="keyword">if</span> (libfile != <span class="keyword">null</span> &amp;&amp; loadLibrary0(fromClass, libfile)) {
+              <span class="keyword">return</span>;
+          }
+      }
+      <span class="comment">//尝试在java.library.path 定义的目录下（windows下的PATH，linux下的LD_LIBRARY_PATH)</span>
+      <span class="keyword">if</span> (loader != <span class="keyword">null</span>) {
+          <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span> ; i &lt; usr_paths.length ; i++) {
+              File libfile = <span class="keyword">new</span> File(usr_paths[i],
+                                      System.mapLibraryName(name));
+              <span class="keyword">if</span> (loadLibrary0(fromClass, libfile)) {
+                  <span class="keyword">return</span>;
+              }
+              ................
+          }
+      }
+      <span class="comment">// Oops, it failed</span>
+      <span class="keyword">throw</span> <span class="keyword">new</span> UnsatisfiedLinkError(<span class="string">"no "</span> + name + <span class="string">" in java.library.path"</span>);
+  }
+</code></pre>
+<p>其中可以看到，对于传入给 <code>System.loadLibrary(String libname)</code> 的参数 <code>libname</code> 是通过调用 <code>System.mapLibraryName</code> 方法来将其映射为库文件的文件名。<br>这个方法是一个<code>native</code>方法，不同系统有不同的实现，具体的区别主要在于前缀和扩展名的不同，例如在 <code>linux</code> 平台下前缀和扩展名分为定义为 <code>lib</code> 和 <code>.so</code> 。具体函数实现是在 <code>openjdk\jdk\src\share\native\java\lang\System.c</code>文件中。</p>
+<pre><code class="c++">JNIEXPORT jstring JNICALL
+Java_java_lang_System_mapLibraryName(JNIEnv *env, jclass ign, jstring libname)
+{
+  <span class="keyword">int</span> len;
+  <span class="keyword">int</span> prefix_len = (<span class="keyword">int</span>) <span class="built_in">strlen</span>(JNI_LIB_PREFIX);
+  <span class="keyword">int</span> suffix_len = (<span class="keyword">int</span>) <span class="built_in">strlen</span>(JNI_LIB_SUFFIX);
+
+  jchar chars[<span class="number">256</span>];
+  <span class="keyword">if</span> (libname == <span class="literal">NULL</span>) {
+      JNU_ThrowNullPointerException(env, <span class="number">0</span>);
+      <span class="keyword">return</span> <span class="literal">NULL</span>;
+  }
+  len = (*env)-&gt;GetStringLength(env, libname);
+  <span class="keyword">if</span> (len &gt; <span class="number">240</span>) {
+      JNU_ThrowIllegalArgumentException(env, <span class="string">"name too long"</span>);
+      <span class="keyword">return</span> <span class="literal">NULL</span>;
+  }
+  cpchars(chars, JNI_LIB_PREFIX, prefix_len);
+  (*env)-&gt;GetStringRegion(env, libname, <span class="number">0</span>, len, chars + prefix_len);
+  len += prefix_len;
+  cpchars(chars + len, JNI_LIB_SUFFIX, suffix_len);
+  len += suffix_len;
+
+  <span class="keyword">return</span> (*env)-&gt;NewString(env, chars, len);
+}
+</code></pre>
+<p><code>JNI_LIB_PREFIX</code> 和 <code>JNI_LIB_PREFIX</code> 分别是前缀、后缀宏定义，针对<code>linux</code>系统该宏定义在 <code>openjdk\jdk\src\solaris\javavm\export\jvm_md.h</code> 文件中。</p>
+<pre><code class="c++"><span class="meta">#<span class="meta-keyword">define</span> JNI_LIB_PREFIX <span class="meta-string">"lib"</span></span>
+<span class="meta">#<span class="meta-keyword">define</span> JNI_LIB_SUFFIX <span class="meta-string">".so"</span></span>
+</code></pre>
+<p>此次调试中，该方法返回 <code>libHelloJNI.so</code> 。找到库文件以后加载工作由 <code>ClassLoader.loadLibrary0</code> 方法完成。</p>
+<h4 id="维护本地库列表"><a href="#维护本地库列表" class="headerlink" title="维护本地库列表"></a>维护本地库列表</h4><p>在讲加载本地库以前，先了解下 <code>NativeLibrary</code> 类，该类是 <code>ClassLoader</code> 的静态内部类。用于封装已经加载过的本地库信息。每个<code>NativeLibrary</code>对象都需要有一个<code>JNI</code>的版本号。这个版本号是虚拟机在载入本地库的时候获取并设置的。每个<code>ClassLoader</code>都会维护一个本地库表<code>private Vector&lt;NativeLibrary&gt; nativeLibraries</code>或者<code>private static Vector&lt;NativeLibrary&gt; systemNativeLibraries</code>（当<code>fromClass.getClassLoader()</code>返回<code>null</code>是即代表<code>BootStrapClassLoader</code>）,在加载本地库之前判断这个类库有没有在本地库列表中，有则直接返回。这样做防止了重复的去调用 <code>System.loadLibrary</code> 去加载同一个库。一个本地库只能被加载一次,这是因为<code>the JNI_OnLoad function can cause another loadLibrary invocation</code>。看代码：</p>
+<pre><code class="java"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">loadLibrary0</span><span class="params">(Class&lt;?&gt; fromClass, <span class="keyword">final</span> File file)</span> </span>{
+      <span class="comment">// Check to see if we're attempting to access a static library</span>
+      <span class="comment">//检查相应的类库是否被静态链接至vm</span>
+      String name = NativeLibrary.findBuiltinLib(file.getName());
+      <span class="keyword">boolean</span> isBuiltin = (name != <span class="keyword">null</span>);
+      <span class="comment">//检查文件是否存在，以及获取文件标准路径</span>
+      <span class="keyword">if</span> (!isBuiltin) {
+          <span class="keyword">boolean</span> exists = AccessController.doPrivileged(
+              <span class="keyword">new</span> PrivilegedAction&lt;Object&gt;() {
+                  <span class="function"><span class="keyword">public</span> Object <span class="title">run</span><span class="params">()</span> </span>{
+                      <span class="keyword">return</span> file.exists() ? Boolean.TRUE : <span class="keyword">null</span>;
+                  }})
+              != <span class="keyword">null</span>;
+          <span class="keyword">if</span> (!exists) {
+              <span class="keyword">return</span> <span class="keyword">false</span>;
+          }
+          <span class="keyword">try</span> {
+              name = file.getCanonicalPath();
+          } <span class="keyword">catch</span> (IOException e) {
+              <span class="keyword">return</span> <span class="keyword">false</span>;
+          }
+      }
+      <span class="comment">//去理解双亲委派模型，fromClass.getClassLoader()返回null时代表BootStrapClassLoader</span>
+      ClassLoader loader =
+          (fromClass == <span class="keyword">null</span>) ? <span class="keyword">null</span> : fromClass.getClassLoader();
+      <span class="comment">//每个ClassLoader维护的本地库列表</span>
+      Vector&lt;NativeLibrary&gt; libs =
+          loader != <span class="keyword">null</span> ? loader.nativeLibraries : systemNativeLibraries;
+      <span class="keyword">synchronized</span> (libs) {
+          <span class="keyword">int</span> size = libs.size();
+          <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; size; i++) {
+              NativeLibrary lib = libs.elementAt(i);
+              <span class="comment">//已被当前ClassLoader加载则直接返回</span>
+              <span class="keyword">if</span> (name.equals(lib.name)) {
+                  <span class="keyword">return</span> <span class="keyword">true</span>;
+              }
+          }
+          <span class="comment">//再看看有没有被其他ClassLoader加载</span>
+          <span class="comment">//注意了，synchronized锁住的只是loadedLibraryNames对象</span>
+          <span class="keyword">synchronized</span> (loadedLibraryNames) {
+              <span class="comment">//加载了就抛异常</span>
+              <span class="keyword">if</span> (loadedLibraryNames.contains(name)) {
+                  <span class="keyword">throw</span> <span class="keyword">new</span> UnsatisfiedLinkError
+                      (<span class="string">"Native Library "</span> +
+                       name +
+                       <span class="string">" already loaded in another classloader"</span>);
+              }
+              <span class="comment">//避免多次加载的原因</span>
+              <span class="comment">/* If the library is being loaded (must be by the same thread,</span>
+<span class="comment">               * because Runtime.load and Runtime.loadLibrary are</span>
+<span class="comment">               * synchronous). The reason is can occur is that the JNI_OnLoad</span>
+<span class="comment">               * function can cause another loadLibrary invocation.</span>
+<span class="comment">               *</span>
+<span class="comment">               * Thus we can use a static stack to hold the list of libraries</span>
+<span class="comment">               * we are loading.</span>
+<span class="comment">               *</span>
+<span class="comment">               * If there is a pending load operation for the library, we</span>
+<span class="comment">               * immediately return success; otherwise, we raise</span>
+<span class="comment">               * UnsatisfiedLinkError.</span>
+<span class="comment">               */</span>
+              <span class="keyword">int</span> n = nativeLibraryContext.size();
+              <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+                  NativeLibrary lib = nativeLibraryContext.elementAt(i);
+                  <span class="keyword">if</span> (name.equals(lib.name)) {
+                      <span class="comment">//如果正在被加载的本地库是由同一个ClassLoader执行，则直接返回，否则异常</span>
+                      <span class="keyword">if</span> (loader == lib.fromClass.getClassLoader()) {
+                          <span class="keyword">return</span> <span class="keyword">true</span>;
+                      } <span class="keyword">else</span> {
+                          <span class="keyword">throw</span> <span class="keyword">new</span> UnsatisfiedLinkError
+                              (<span class="string">"Native Library "</span> +
+                               name +
+                               <span class="string">" is being loaded in another classloader"</span>);
+                      }
+                  }
+              }
+              <span class="comment">//这个本地库从没有被加载过执行以下过程</span>
+              <span class="comment">//nativeLibraryContext表示正在被其他线程加载的本地库</span>
+              NativeLibrary lib = <span class="keyword">new</span> NativeLibrary(fromClass, name, isBuiltin);
+              nativeLibraryContext.push(lib);
+              <span class="keyword">try</span> {
+                  <span class="comment">//加载的具体实现</span>
+                  lib.load(name, isBuiltin);
+              } <span class="keyword">finally</span> {
+                  nativeLibraryContext.pop();
+              }
+              <span class="comment">//被正确加载后再维护本地库列表</span>
+              <span class="keyword">if</span> (lib.loaded) {
+                  loadedLibraryNames.addElement(name);
+                  libs.addElement(lib);
+                  <span class="keyword">return</span> <span class="keyword">true</span>;
+              }
+              <span class="keyword">return</span> <span class="keyword">false</span>;
+          }
+      }
+  }
+</code></pre>
+<p>上面代码中<code>NativeLibrary.findBuiltinLib</code>方法可以去<a href="https://bugs.openjdk.java.net/browse/JDK-8081674" target="_blank" rel="noopener">这里</a>深入研究。<br>疑问：上面代码中每个<code>ClassLoader</code>都维护了自己的本地库列表，而本地库列表在所有的<code>ClassLoader</code>中只能出现一次，那为什么不直接存在一个静态列表中，像<code>loadedLibraryNames</code>一样？</p>
+<h4 id="载入本地库"><a href="#载入本地库" class="headerlink" title="载入本地库"></a>载入本地库</h4><p>在<code>NativeLibrary</code>类中，有三个本地方法，<code>native void load(String name);</code>、<code>native void load(String name);</code>、<code>native void load(String name);</code>。分别是用来加载本地库，找到本地库的指针地址，卸载本地库。下面来看一下<code>load(String name)</code>方法的具体实现。源码在<code>openjdk\jdk\src\share\native\java\lang\ClassLoader.c</code>中。</p>
+<pre><code class="c++">JNIEXPORT <span class="keyword">void</span> JNICALL
+Java_java_lang_ClassLoader_00024NativeLibrary_load
+(JNIEnv *env, jobject <span class="keyword">this</span>, jstring name, jboolean isBuiltin)
+{
+  <span class="keyword">const</span> <span class="keyword">char</span> *cname;
+  jint jniVersion;
+  jthrowable cause;
+  <span class="keyword">void</span> * handle;
+
+  <span class="keyword">if</span> (!initIDs(env))
+      <span class="keyword">return</span>;
+
+  cname = JNU_GetStringPlatformChars(env, name, <span class="number">0</span>);
+  <span class="keyword">if</span> (cname == <span class="number">0</span>)
+      <span class="keyword">return</span>;
+
+  <span class="comment">//这个procHandle函数就是在findBuiltinLib方法中实现的，c++能力有限看不明白！</span>
+  <span class="comment">//不管是procHandle或者JVM_LoadLibrary(cname)最终调用的是os::dll_load(name, ebuf, sizeof ebuf)</span>
+  handle = isBuiltin ? procHandle : JVM_LoadLibrary(cname);
+  <span class="keyword">if</span> (handle) {
+      JNI_OnLoad_t JNI_OnLoad;
+      <span class="comment">//去查找.so文件中有没有实现JNI_OnLoad函数，这里我没有实现</span>
+      JNI_OnLoad = (JNI_OnLoad_t)findJniFunction(env, handle,
+                                             isBuiltin ? cname : <span class="literal">NULL</span>,
+                                             JNI_TRUE);
+      <span class="comment">//如果实现JNI_OnLoad，则必须返回JNI版本号，找不到直接用0x00010001</span>
+      <span class="keyword">if</span> (JNI_OnLoad) {
+          JavaVM *jvm;
+          (*env)-&gt;GetJavaVM(env, &amp;jvm);
+          jniVersion = (*JNI_OnLoad)(jvm, <span class="literal">NULL</span>);
+      } <span class="keyword">else</span> {
+          jniVersion = <span class="number">0x00010001</span>;
+      }
+
+      cause = (*env)-&gt;ExceptionOccurred(env);
+      <span class="keyword">if</span> (cause) {
+          (*env)-&gt;ExceptionClear(env);
+          (*env)-&gt;Throw(env, cause);
+          <span class="keyword">if</span> (!isBuiltin) {
+              JVM_UnloadLibrary(handle);
+          }
+          <span class="keyword">goto</span> done;
+      }
+
+      <span class="keyword">if</span> (!JVM_IsSupportedJNIVersion(jniVersion) ||
+          (isBuiltin &amp;&amp; jniVersion &lt; JNI_VERSION_1_8)) {
+          <span class="keyword">char</span> msg[<span class="number">256</span>];
+          jio_snprintf(msg, <span class="keyword">sizeof</span>(msg),
+                       <span class="string">"unsupported JNI version 0x%08X required by %s"</span>,
+                       jniVersion, cname);
+          JNU_ThrowByName(env, <span class="string">"java/lang/UnsatisfiedLinkError"</span>, msg);
+          <span class="keyword">if</span> (!isBuiltin) {
+              JVM_UnloadLibrary(handle);
+          }
+          <span class="keyword">goto</span> done;
+      }
+      <span class="comment">//回调函数，将JNI版本号回填至NativeLibrary类中</span>
+      (*env)-&gt;SetIntField(env, <span class="keyword">this</span>, jniVersionID, jniVersion);
+  } <span class="keyword">else</span> {
+      cause = (*env)-&gt;ExceptionOccurred(env);
+      <span class="keyword">if</span> (cause) {
+          (*env)-&gt;ExceptionClear(env);
+          (*env)-&gt;SetLongField(env, <span class="keyword">this</span>, handleID, (jlong)<span class="number">0</span>);
+          (*env)-&gt;Throw(env, cause);
+      }
+      <span class="keyword">goto</span> done;
+  }
+  <span class="comment">//回调函数，将handleID回填至NativeLibrary类中</span>
+  (*env)-&gt;SetLongField(env, <span class="keyword">this</span>, handleID, ptr_to_jlong(handle));
+  <span class="comment">//回调函数，将是否加载成功回填至NativeLibrary类中</span>
+  (*env)-&gt;SetBooleanField(env, <span class="keyword">this</span>, loadedID, JNI_TRUE);
+
+done:
+  JNU_ReleaseStringPlatformChars(env, name, cname);
+}
+</code></pre>
+<blockquote>
+<p>注意：这里的 <code>_00024</code> 表示的是 <code>$</code> 符号，用来在java中表示内部类。</p>
+</blockquote>
+</li>
+</ul>
+<p>上面代码中加载的动作其实是 <code>procHandle</code> 或者 <code>JVM_LoadLibrary(cname)</code> ，二者最终都调用了<code>os::dll_load</code>函数。看 <code>JVM_LoadLibrary(cname)</code> 函数的实现，<code>D:\jvm\openjdk\hotspot\src\share\vm\prims\jvm.cpp</code></p>
+<pre><code class="c++">JVM_ENTRY_NO_ENV(<span class="keyword">void</span>*, JVM_LoadLibrary(<span class="keyword">const</span> <span class="keyword">char</span>* name))
+  <span class="comment">//%note jvm_ct</span>
+  JVMWrapper2(<span class="string">"JVM_LoadLibrary (%s)"</span>, name);
+  <span class="keyword">char</span> ebuf[<span class="number">1024</span>];
+  <span class="keyword">void</span> *load_result;
+  {
+    <span class="function">ThreadToNativeFromVM <span class="title">ttnfvm</span><span class="params">(thread)</span></span>;
+    <span class="comment">//调用os::dll_load函数</span>
+    load_result = os::dll_load(name, ebuf, <span class="keyword">sizeof</span> ebuf);
+  }
+  <span class="keyword">if</span> (load_result == <span class="literal">NULL</span>) {
+    <span class="keyword">char</span> msg[<span class="number">1024</span>];
+    jio_snprintf(msg, <span class="keyword">sizeof</span> msg, <span class="string">"%s: %s"</span>, name, ebuf);
+    <span class="comment">// Since 'ebuf' may contain a string encoded using</span>
+    <span class="comment">// platform encoding scheme, we need to pass</span>
+    <span class="comment">// Exceptions::unsafe_to_utf8 to the new_exception method</span>
+    <span class="comment">// as the last argument. See bug 6367357.</span>
+    Handle h_exception =
+      Exceptions::new_exception(thread,
+                                vmSymbols::java_lang_UnsatisfiedLinkError(),
+                                msg, Exceptions::unsafe_to_utf8);
+
+    THROW_HANDLE_0(h_exception);
+  }
+  <span class="keyword">return</span> load_result;
+JVM_END
+</code></pre>
+<p>这个<code>os::dll_load</code> 函数是根据系统不同而由不同的实现的。<br>在 linux 系统下的实现在 <code>openjdk/hotspot/src/os/linux/vm/os_linux.cpp</code> 文件中,它其中主要做了两件事情，一个是使用 <code>linux</code> 的 <code>dlopen</code> 来打开这个<code>so</code>本地库文件，再则检查了这个so本地库文件是否和当前运行虚拟机的CPU架构是否相同。<code>dlopen</code>函数定义在 <code>dlfcn.h</code>，原型为：</p>
+<pre><code class="c++"><span class="function"><span class="keyword">void</span> * <span class="title">dlopen</span><span class="params">( <span class="keyword">const</span> <span class="keyword">char</span> * pathname, <span class="keyword">int</span> mode)</span></span>;
+</code></pre>
+<p>其中第二个参数使用的是 RTLD_LAZY: 异常绑定。<br>在<code>windows</code>的实现是使用 <code>LoadLibrary</code> 函数来加载 <code>dll</code> 本地库。​<br>本地库打开后，执行<code>JNI_OnLoad</code>函数获取JNI版本号，再将<code>handle</code>、<code>jniVersion</code>、<code>loaded</code>等回填至<code>NativeLibrary</code>类中。</p>
+<h3 id="卸载本地库"><a href="#卸载本地库" class="headerlink" title="卸载本地库"></a>卸载本地库</h3><p>卸载和加载是相反的过程，卸载是在 <code>NativeLibrary</code> 类的 <code>finalize</code> 方法中调用的，而<code>finalize</code> 方法是在该类的示例被GC时调用。卸载的本地代码如下：</p>
+<pre><code class="c++">JNIEXPORT <span class="keyword">void</span> JNICALL
+Java_java_lang_ClassLoader_00024NativeLibrary_unload
+(JNIEnv *env, jobject <span class="keyword">this</span>, jstring name, jboolean isBuiltin)
+{
+    <span class="keyword">const</span> <span class="keyword">char</span> *onUnloadSymbols[] = JNI_ONUNLOAD_SYMBOLS;
+    <span class="keyword">void</span> *handle;
+    JNI_OnUnload_t JNI_OnUnload;
+     <span class="keyword">const</span> <span class="keyword">char</span> *cname;
+
+    <span class="keyword">if</span> (!initIDs(env))
+        <span class="keyword">return</span>;
+    cname = JNU_GetStringPlatformChars(env, name, <span class="number">0</span>);
+    <span class="keyword">if</span> (cname == <span class="literal">NULL</span>) {
+        <span class="keyword">return</span>;
+    }
+    handle = jlong_to_ptr((*env)-&gt;GetLongField(env, <span class="keyword">this</span>, handleID));
+    JNI_OnUnload = (JNI_OnUnload_t )findJniFunction(env, handle,
+                                                isBuiltin ? cname : <span class="literal">NULL</span>,
+                                                JNI_FALSE);
+    <span class="keyword">if</span> (JNI_OnUnload) {
+        JavaVM *jvm;
+        (*env)-&gt;GetJavaVM(env, &amp;jvm);
+        (*JNI_OnUnload)(jvm, <span class="literal">NULL</span>);
+    }
+    <span class="keyword">if</span> (!isBuiltin) {
+        JVM_UnloadLibrary(handle);
+    }
+    JNU_ReleaseStringPlatformChars(env, name, cname);
+}
+</code></pre>
+<p>先调用<code>JNI_OnUnload</code>函数，在调用<code>JVM_UnloadLibrary</code>进行卸载，最终调用<code>os::dll_unload(handle);</code>函数，该函数也是根据平台不同而实现。在<code>linux</code>平台上，使用 <code>dlopen</code> 函数来 <code>load</code> <code>so文件</code>， 使用 <code>dlclose</code> 函数来 <code>unload</code>。在<code>windows</code>平台上，使用 <code>LoadLibrary</code> 函数来<code>load</code> <code>dll文件</code>，来 <code>FreeLibrary</code> 函数来 <code>unload</code>。</p>
+<h3 id="查找native方法"><a href="#查找native方法" class="headerlink" title="查找native方法"></a>查找native方法</h3><p>这里先来了解下方法的调用，方法在执行之前有一个解析和分派的过程（暂时只考虑静态解析过程），所有方法调用中的目标方法在<code>class文件</code>里都是一个常量池中的符号引用，在类加载的解析阶段，会将其中一部分的符号引用转化为直接引用，就是方法的内存地址。（参考深入理解java虚拟机8.3章节）<br>JVM在加载类的时候发现某个方法有<code>ACC_NATIVE</code>标志，解析时会调用<code>ClassLoader</code>的<code>findNative</code>方法：</p>
+<pre><code class="java"><span class="comment">// Invoked in the VM class linking code.</span>
+<span class="comment">//name参数是native方法名对应C文件中的函数名,本次调试值为：Java_HelloJNI_sayHello</span>
+<span class="function"><span class="keyword">static</span> <span class="keyword">long</span> <span class="title">findNative</span><span class="params">(ClassLoader loader, String name)</span> </span>{
+    Vector&lt;NativeLibrary&gt; libs =
+        loader != <span class="keyword">null</span> ? loader.nativeLibraries : systemNativeLibraries;
+    <span class="keyword">synchronized</span> (libs) {
+        <span class="keyword">int</span> size = libs.size();
+        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; size; i++) {
+            NativeLibrary lib = libs.elementAt(i);
+            <span class="keyword">long</span> entry = lib.find(name);
+            <span class="keyword">if</span> (entry != <span class="number">0</span>)
+                <span class="keyword">return</span> entry;
+        }
+    }
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</code></pre>
+<p>实际上就是查找本地库列表中有没有对应的方法。</p>
+<pre><code class="c++">JNIEXPORT jlong JNICALL
+Java_java_lang_ClassLoader_00024NativeLibrary_find
+  (JNIEnv *env, jobject <span class="keyword">this</span>, jstring name)
+{
+    jlong handle;
+    <span class="keyword">const</span> <span class="keyword">char</span> *cname;
+    jlong res;
+
+    <span class="keyword">if</span> (!initIDs(env))
+        <span class="keyword">return</span> jlong_zero;
+    <span class="comment">//存在NativeLibrary类中的handle</span>
+    handle = (*env)-&gt;GetLongField(env, <span class="keyword">this</span>, handleID);
+    cname = (*env)-&gt;GetStringUTFChars(env, name, <span class="number">0</span>);
+    <span class="keyword">if</span> (cname == <span class="number">0</span>)
+        <span class="keyword">return</span> jlong_zero;
+    <span class="comment">//根据函数名去查找函数的入口地址，找不到就返回0</span>
+    res = ptr_to_jlong(JVM_FindLibraryEntry(jlong_to_ptr(handle), cname));
+    (*env)-&gt;ReleaseStringUTFChars(env, name, cname);
+    <span class="keyword">return</span> res;
+}
+</code></pre>
+<p><code>JVM_FindLibraryEntry</code>方法最终调用<code>os::dll_lookup</code>函数去查找入口地址。每个系统实现不一样，在<code>linux</code>平台上，使用<code>dlsym(handle, name)</code>函数来获取某个方法的内存地址。在<code>windows</code>平台上，使用 <code>GetProcAddress</code> 函数来获取某个方法的内存地址。​<br>这里面有一个比较重要的变量就是 <code>handleID</code> ，这个<code>handleID</code>是从哪里来，存在哪里都比较关键。首先我们来看这个<code>handleID</code>来至哪里，它其实是 <code>JVM_LoadLibrary</code> 返回的值，即 <code>dlopen</code> 返回的值，这个比较简单，它是在打开本地库时返回的句柄，然后这个句柄并没有保存在<code>native</code>层，而是将其保存在了<code>Java</code>层。</p>
+<h2 id="RegisterNatives-函数"><a href="#RegisterNatives-函数" class="headerlink" title="RegisterNatives 函数"></a>RegisterNatives 函数</h2><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>回看上面的查找方法，依赖<code>JNI</code>的命名规则。加载类库时要按照一定的命名规则，最不可忍的是查找函数也要用到一定的方法名，这就导致java方法名不能修改。另外<code>jvm</code>调用本地函数时还要去寻找相应的入口，影响效率。如果想摆脱这种冗长的规则，就需要用到<code>RegisterNatives</code>函数来解决。<br><strong><code>RegisterNatives</code>函数是定义在<code>jni.h</code>头文件中的，遗憾的是我没有找到它的实现在哪，了解<code>RegisterNatives</code>之前先了解下<code>JNIEnv</code>，是定义在<code>jni.h</code>头文件中的一个机构体，里面就包含了<code>RegisterNatives</code>函数以及其他<code>JNI</code>的方法。<code>JNIEnv*</code> 是定义任意 <code>native</code> 函数的第一个参数,指向 JVM 函数表的指针，函数表中的每一个入口指向一个 <code>JNI</code> 函数，每个函数用于访问 <code>JVM</code> 中特定的数据结构(可以直接访问类实例以及方法区里面的数据)。<br>传统方式下，<code>Java</code>类<code>call</code>本地函数时，通常是依靠VM去动态寻找<code>.so</code>中的本地函数(因此它们才需要特定规则的命名格式)，而使用<code>RegisterNatives</code>将本地函数向<code>VM</code>进行登记，可以让其更有效率的找到函数,另外<code>RegisterNatives</code>函数还有一个优点，运行时动态调整本地函数与<code>Java</code>函数值之间的映射关系，只需要多次<code>call RegisterNatives()</code>方法，并传入不同的映射表参数即可。</strong><br><code>RegisterNatives</code>定义:</p>
+<pre><code class="c++">jint (JNICALL *RegisterNatives)
+      (JNIEnv *env, jclass clazz, <span class="keyword">const</span> JNINativeMethod *methods,
+       jint nMethods);
+</code></pre>
+<p>重点关注<code>methods</code>参数，这就是上面说的本地函数与<code>Java</code>函数值之间的映射表，映射表的数据结构如下：</p>
+<pre><code class="c++"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> {</span>
+    <span class="keyword">char</span> *name;    <span class="comment">//java 中的方法名</span>
+    <span class="keyword">char</span> *signature; <span class="comment">//方法签名 </span>
+    <span class="keyword">void</span> *fnPtr; <span class="comment">//native函数指针</span>
+} JNINativeMethod;
+<span class="comment">//以下是java.lang.Object类中本地方法映射表</span>
+<span class="keyword">static</span> JNINativeMethod methods[] = {
+    {<span class="string">"hashCode"</span>,    <span class="string">"()I"</span>,                    (<span class="keyword">void</span> *)&amp;JVM_IHashCode},
+    {<span class="string">"wait"</span>,        <span class="string">"(J)V"</span>,                   (<span class="keyword">void</span> *)&amp;JVM_MonitorWait},
+    {<span class="string">"notify"</span>,      <span class="string">"()V"</span>,                    (<span class="keyword">void</span> *)&amp;JVM_MonitorNotify},
+    {<span class="string">"notifyAll"</span>,   <span class="string">"()V"</span>,                    (<span class="keyword">void</span> *)&amp;JVM_MonitorNotifyAll},
+    {<span class="string">"clone"</span>,       <span class="string">"()Ljava/lang/Object;"</span>,   (<span class="keyword">void</span> *)&amp;JVM_Clone},
+};
+<span class="comment">//下面是一般情况下的定义，getNativeString是java方法名</span>
+<span class="comment">//getString是本地函数名,reinterpret_cast&lt;void*&gt;强制转换成了函数指针</span>
+<span class="keyword">static</span> JNINativeMethod methods[] = {
+        {<span class="string">"getNativeString"</span>, <span class="string">"()Ljava/lang/String;"</span>, <span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">void</span>*&gt;(getString)}
+};
+</code></pre>
+<p>第三个参数<code>*fnPtr</code>估计就是<code>java</code>方法调用所需要的这是引用，<code>java</code>在进行本地方法调用时不需要去搜索本地方法的引用，很大程度上提升了效率。</p>
+<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><p>使用<code>RegisterNatives</code> 函数进行本地函数登记的方法一般有两种，第一种是在class中多加一个本地方法用来调用 <code>RegisterNatives</code> 函数，第二种是利用<code>JNI_OnLoad()</code>方法。<br>第一种方式是jdk中使用的方法，我们来看一段JDK源码,<code>java.lang.Object</code>:</p>
+<pre><code class="java"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Object</span> </span>{
+    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">native</span> <span class="keyword">void</span> <span class="title">registerNatives</span><span class="params">()</span></span>;
+    <span class="keyword">static</span> {
+        registerNatives();
+    }
+    <span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> Class&lt;?&gt; getClass();
+    <span class="function"><span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span></span>;
+    <span class="function"><span class="keyword">protected</span> <span class="keyword">native</span> Object <span class="title">clone</span><span class="params">()</span> <span class="keyword">throws</span> CloneNotSupportedException</span>;
+    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> <span class="keyword">void</span> <span class="title">notify</span><span class="params">()</span></span>;
+    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">native</span> <span class="keyword">void</span> <span class="title">notifyAll</span><span class="params">()</span></span>;
+}
+</code></pre>
+<p><code>java.lang.Object</code>类中定义了6个本地方法，并且在<code>static</code>块中调用了第一个本地方法。来看看本地方法的实现：<code>D:\jvm\openjdk\jdk\src\share\native\java\lang\Object.c</code>:</p>
+<pre><code class="c++">
+<span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span>
+<span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;signal.h&gt;</span></span>
+<span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;limits.h&gt;</span></span>
+
+<span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"jni.h"</span></span>
+<span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"jni_util.h"</span></span>
+<span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"jvm.h"</span></span>
+
+<span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"java_lang_Object.h"</span></span>
+
+<span class="keyword">static</span> JNINativeMethod methods[] = {
+    {<span class="string">"hashCode"</span>,    <span class="string">"()I"</span>,                    (<span class="keyword">void</span> *)&amp;JVM_IHashCode},
+    {<span class="string">"wait"</span>,        <span class="string">"(J)V"</span>,                   (<span class="keyword">void</span> *)&amp;JVM_MonitorWait},
+    {<span class="string">"notify"</span>,      <span class="string">"()V"</span>,                    (<span class="keyword">void</span> *)&amp;JVM_MonitorNotify},
+    {<span class="string">"notifyAll"</span>,   <span class="string">"()V"</span>,                    (<span class="keyword">void</span> *)&amp;JVM_MonitorNotifyAll},
+    {<span class="string">"clone"</span>,       <span class="string">"()Ljava/lang/Object;"</span>,   (<span class="keyword">void</span> *)&amp;JVM_Clone},
+};
+
+JNIEXPORT <span class="keyword">void</span> JNICALL
+Java_java_lang_Object_registerNatives(JNIEnv *env, jclass cls)
+{
+    (*env)-&gt;RegisterNatives(env, cls,
+                            methods, <span class="keyword">sizeof</span>(methods)/<span class="keyword">sizeof</span>(methods[<span class="number">0</span>]));
+}
+
+JNIEXPORT jclass JNICALL
+Java_java_lang_Object_getClass(JNIEnv *env, jobject <span class="keyword">this</span>)
+{
+    <span class="keyword">if</span> (<span class="keyword">this</span> == <span class="literal">NULL</span>) {
+        JNU_ThrowNullPointerException(env, <span class="literal">NULL</span>);
+        <span class="keyword">return</span> <span class="number">0</span>;
+    } <span class="keyword">else</span> {
+        <span class="keyword">return</span> (*env)-&gt;GetObjectClass(env, <span class="keyword">this</span>);
+    }
+}
+</code></pre>
+<p>一目了然，<code>registerNatives</code>方法利用传统方式调用，其他的方法在<code>registerNatives</code>方法里面进行注册即可。<br>利用<code>JNI_OnLoad()</code>方法进行注册也很简单，回想一下<code>ClassLoader</code>在装载库文件之后会调用库文件中的<code>JNI_OnLoad()</code>方法，只要在库文件中实现<code>JNI_OnLoad()</code>方法即可。</p>
+<pre><code class="c++">JNIEXPORT <span class="keyword">void</span> JNICALL
+Java_java_lang_ClassLoader_00024NativeLibrary_load
+  (JNIEnv *env, jobject <span class="keyword">this</span>, jstring name, jboolean isBuiltin)
+{
+
+    JNI_OnLoad_t JNI_OnLoad;
+    <span class="comment">//去查找.so文件中有没有实现JNI_OnLoad函数，这里我没有实现</span>
+    JNI_OnLoad = (JNI_OnLoad_t)findJniFunction(env, handle,
+                                           isBuiltin ? cname : <span class="literal">NULL</span>,
+                                           JNI_TRUE);
+    <span class="comment">//如果实现JNI_OnLoad，则必须返回JNI版本号，找不到直接用0x00010001</span>
+    <span class="keyword">if</span> (JNI_OnLoad) {
+        JavaVM *jvm;
+        (*env)-&gt;GetJavaVM(env, &amp;jvm);
+        jniVersion = (*JNI_OnLoad)(jvm, <span class="literal">NULL</span>);
+    } <span class="keyword">else</span> {
+        jniVersion = <span class="number">0x00010001</span>;
+    }
+}
+</code></pre>
+<p><code>findJniFunction</code>实际上调用的是<code>JVM_FindLibraryEntry(handle, jniFunctionName)</code>方法，跟<code>Java_java_lang_ClassLoader_00024NativeLibrary_find</code>类似。<br>疑问：调试时<code>jniFunctionName</code>参数是<code>JNI_OnLoad_HelloJNI</code>并非是<code>JNI_OnLoad</code>，所以<code>libHello.so</code>到底实现<code>JNI_OnLoad_HelloJNI</code>还是是<code>JNI_OnLoad</code>？我并没有去试。<br><code>libHello.so</code>的实现可以是下面的样子（未测试）。</p>
+<pre><code class="c++"><span class="comment">// HelloJNI.c</span>
+<span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;HelloJNI.h&gt;</span></span>
+/- Header <span class="keyword">for</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloJNI</span> */</span>
+<span class="class"></span>
+<span class="class">#<span class="title">ifdef</span> __<span class="title">cplusplus</span>  </span>
+<span class="class"><span class="title">extern</span> "<span class="title">C</span>"  </span>
+<span class="class">{</span>  
+<span class="meta">#<span class="meta-keyword">endif</span>  </span>
+<span class="comment">/*</span>
+<span class="comment"> - Class:     HelloJNI</span>
+<span class="comment"> - Method:    sayHello</span>
+<span class="comment"> - Signature: (Ljava/lang/String;)Ljava/lang/String;</span>
+<span class="comment"> */</span>
+ <span class="comment">//这里的方法名可以随便取咯</span>
+JNIEXPORT jstring JNICALL sayHi
+  (JNIEnv *env, jclass cls, jstring j_str)
+  {  
+    <span class="keyword">const</span> <span class="keyword">char</span> *c_str = <span class="literal">NULL</span>;  
+    <span class="keyword">char</span> buff[<span class="number">128</span>] = { <span class="number">0</span> };  
+    c_str = (*env)-&gt;GetStringUTFChars(env, j_str, <span class="literal">NULL</span>);  
+    <span class="keyword">if</span> (c_str == <span class="literal">NULL</span>)  
+    {  
+        <span class="built_in">printf</span>(<span class="string">"out of memory.\n"</span>);  
+        <span class="keyword">return</span> <span class="literal">NULL</span>;  
+    }  
+    (*env)-&gt;ReleaseStringUTFChars(env, j_str, c_str);  
+    <span class="built_in">printf</span>(<span class="string">"Hello,I'm C++,the Java Str is:%s\n"</span>, c_str); 
+    <span class="built_in">sprintf</span>(buff, <span class="string">"hello %s"</span>, c_str);  
+    <span class="keyword">return</span> (*env)-&gt;NewStringUTF(env, buff);  
+}  
+
+<span class="comment">//定义映射表</span>
+<span class="keyword">static</span> JNINativeMethod methods[] = {
+        {<span class="string">"sayHello"</span>, <span class="string">"()Ljava/lang/String;"</span>, <span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">void</span>*&gt;(sayHi)}
+};
+
+<span class="comment">//有可能是JNI_OnLoad_HelloJNI</span>
+<span class="function">JNIEXPORT jint <span class="title">JNI_OnLoad</span><span class="params">(JavaVM *vm, <span class="keyword">void</span> *reserved)</span></span>
+<span class="function"></span>{
+    <span class="comment">//这段代码网上copy的，并没有实测，不过该函数必须返回JNI版本号，默认版本号上面也有</span>
+    JNIEnv* env;
+    <span class="keyword">if</span> (JNI_OK != vm-&gt;GetEnv(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">void</span>**&gt; (&amp;env),JNI_VERSION_1_4)) {
+        <span class="keyword">return</span> JNI_ERR;
+    }
+
+    g_jvm = vm; <span class="comment">//用于后面获取JNIEnv</span>
+    jclass clazz = env-&gt;FindClass(<span class="string">"com/example/myndkproj/NativeLib"</span>);  <span class="comment">//获取Java NativeLib类</span>
+
+    <span class="comment">//注册Native方法</span>
+    <span class="keyword">if</span> (env-&gt;RegisterNatives(clazz, methods, <span class="keyword">sizeof</span>(methods)/<span class="keyword">sizeof</span>((methods)[<span class="number">0</span>])) &lt; <span class="number">0</span>) {
+        LOGW(<span class="string">"RegisterNatives error"</span>);
+        <span class="keyword">return</span> JNI_ERR;
+    }
+
+    <span class="keyword">return</span> JNI_VERSION_1_4;
+}
+
+<span class="meta">#<span class="meta-keyword">ifdef</span> __cplusplus  </span>
+}  
+<span class="meta">#<span class="meta-keyword">endif</span></span>
+</code></pre>
+<blockquote>
+<p>参考：<a href="http://wiki.jikexueyuan.com/project/jni-ndk-developer-guide/workflow.html" target="_blank" rel="noopener">极客学院</a>   <a href="http://blog.crasheye.cn/jvm-local-lib-loading-code-reading.html" target="_blank" rel="noopener">Crasheye’s Blog</a>  <a href="http://jellypaul.github.io/java/2016/11/15/JNI-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E9%80%9A%E8%BF%87RegisterNatives%E6%B3%A8%E5%86%8C%E5%8E%9F%E7%94%9F%E6%96%B9%E6%B3%95.html" target="_blank" rel="noopener">JellyJoe</a> <a href="http://techbook.blog.163.com/blog/static/304885102012235613945/" target="_blank" rel="noopener">奔IV的博客</a></p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/java/" rel="tag"># java</a>
+          
+            <a href="/tags/jni/" rel="tag"># jni</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/15/了解java标准类库/" rel="next" title="了解java标准类库">
+                <i class="fa fa-chevron-left"></i> 了解java标准类库
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/24/分布式事务管理/" rel="prev" title="分布式事务管理">
+                分布式事务管理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div onclick="showGitment()" id="gitment-display-button">显示 Gitment 评论</div>
+        <div id="gitment-container" style="display:none"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/gougou.jpg"
+                alt="鸡哥" />
+            
+              <p class="site-author-name" itemprop="name">鸡哥</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/jiges" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i></a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:ccr12312@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i></a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#陷阱与诱惑"><span class="nav-number">2.</span> <span class="nav-text">陷阱与诱惑</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JNI开发流程"><span class="nav-number">3.</span> <span class="nav-text">JNI开发流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#开发HelloWorld程序"><span class="nav-number">3.1.</span> <span class="nav-text">开发HelloWorld程序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#编写声明了-native-方法的-Java-类"><span class="nav-number">3.1.1.</span> <span class="nav-text">编写声明了 native 方法的 Java 类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编译class文件"><span class="nav-number">3.1.2.</span> <span class="nav-text">编译class文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成-h头文件"><span class="nav-number">3.1.3.</span> <span class="nav-text">生成.h头文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现头文件中申明的函数"><span class="nav-number">3.1.4.</span> <span class="nav-text">实现头文件中申明的函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编译C文件"><span class="nav-number">3.1.5.</span> <span class="nav-text">编译C文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行-Java-程序"><span class="nav-number">3.1.6.</span> <span class="nav-text">运行 Java 程序</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM-查找-native-方法"><span class="nav-number">4.</span> <span class="nav-text">JVM 查找 native 方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#命名规则查找方式"><span class="nav-number">4.1.</span> <span class="nav-text">命名规则查找方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#加载本地库文件"><span class="nav-number">4.1.1.</span> <span class="nav-text">加载本地库文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#寻找本地库文件"><span class="nav-number">4.1.1.1.</span> <span class="nav-text">寻找本地库文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#维护本地库列表"><span class="nav-number">4.1.1.2.</span> <span class="nav-text">维护本地库列表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#载入本地库"><span class="nav-number">4.1.1.3.</span> <span class="nav-text">载入本地库</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#卸载本地库"><span class="nav-number">4.1.2.</span> <span class="nav-text">卸载本地库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查找native方法"><span class="nav-number">4.1.3.</span> <span class="nav-text">查找native方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RegisterNatives-函数"><span class="nav-number">4.2.</span> <span class="nav-text">RegisterNatives 函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#原理"><span class="nav-number">4.2.1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现"><span class="nav-number">4.2.2.</span> <span class="nav-text">实现</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">鸡哥</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'jiges',
+            repo: 'jiges.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '3bfafe08bfcef158878f09910c6a9f2aef7391de',
+            
+                client_id: 'c41b93a72f2b21dcc1ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      function showGitment(){
+        document.getElementById("gitment-display-button").style.display = "none";
+        document.getElementById("gitment-container").style.display = "block";
+        renderGitment();
+      }
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("paa9xqTl09B7K7pJzx3tI8A7-gzGzoHsz", "Tt2YuM3CWPcI5gNeGiQR9qeh");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

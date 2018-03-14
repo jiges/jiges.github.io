@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="java," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近微信跳一跳小游戏在朋友圈着实火了一把，为了争第一，朋友圈的最高分一次一次刷新，随后好多人晒出了自己刷分攻略，有制作物理外挂的，有程序外挂的。作为程序员，特别动手能力比较强的程序员，这时候就闲不住了。GitHub上已经有Python版外挂(https://github.com/wangshub/wechat_jump">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="跳一跳辅助的java实现">
+<meta property="og:url" content="https://jiges.github.io/2018/01/10/跳一跳辅助的java实现/index.html">
+<meta property="og:site_name" content="鸡哥の博客">
+<meta property="og:description" content="最近微信跳一跳小游戏在朋友圈着实火了一把，为了争第一，朋友圈的最高分一次一次刷新，随后好多人晒出了自己刷分攻略，有制作物理外挂的，有程序外挂的。作为程序员，特别动手能力比较强的程序员，这时候就闲不住了。GitHub上已经有Python版外挂(https://github.com/wangshub/wechat_jump_game)，这里我用Java实现。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://jiges.github.io/2018/01/10/跳一跳辅助的java实现/jump.gif">
+<meta property="og:image" content="https://jiges.github.io/2018/01/10/跳一跳辅助的java实现/小人.png">
+<meta property="og:image" content="https://jiges.github.io/2018/01/10/跳一跳辅助的java实现/找点.png">
+<meta property="og:updated_time" content="2018-01-10T08:13:31.979Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="跳一跳辅助的java实现">
+<meta name="twitter:description" content="最近微信跳一跳小游戏在朋友圈着实火了一把，为了争第一，朋友圈的最高分一次一次刷新，随后好多人晒出了自己刷分攻略，有制作物理外挂的，有程序外挂的。作为程序员，特别动手能力比较强的程序员，这时候就闲不住了。GitHub上已经有Python版外挂(https://github.com/wangshub/wechat_jump_game)，这里我用Java实现。">
+<meta name="twitter:image" content="https://jiges.github.io/2018/01/10/跳一跳辅助的java实现/jump.gif">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://jiges.github.io/2018/01/10/跳一跳辅助的java实现/"/>
+
+
+
+
+
+  <title>跳一跳辅助的java实现 | 鸡哥の博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">鸡哥の博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/index.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://jiges.github.io/2018/01/10/跳一跳辅助的java实现/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="鸡哥">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/gougou.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鸡哥の博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">跳一跳辅助的java实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-10T09:17:13+08:00">
+                2018-01-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/01/10/跳一跳辅助的java实现/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/01/10/跳一跳辅助的java实现/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/01/10/跳一跳辅助的java实现/" class="leancloud_visitors" data-flag-title="跳一跳辅助的java实现">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>最近微信跳一跳小游戏在朋友圈着实火了一把，为了争第一，朋友圈的最高分一次一次刷新，随后好多人晒出了自己刷分攻略，有制作物理外挂的，有程序外挂的。作为程序员，特别动手能力比较强的程序员，这时候就闲不住了。<code>GitHub</code>上已经有<code>Python</code>版外挂<a href="https://github.com/wangshub/wechat_jump_game" target="_blank" rel="noopener">(https://github.com/wangshub/wechat_jump_game)</a>，这里我用<code>Java</code>实现。</p>
+</blockquote>
+<img src="/2018/01/10/跳一跳辅助的java实现/jump.gif" title="自动脚本跳一跳">
+<a id="more"></a>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>跳一跳辅助的原理特别简单，主要由以下几个步骤完成：</p>
+<ul>
+<li>量出小人底盘中心点的位置与下一跳中心点的距离（可以通过鼠标点击的方式测量或者图像分析的方式获得），因为每次跳跃的角度有一定规律，所以获取两点的横向距离也可以。</li>
+<li>手动多跳几次，记录时间和距离，二者之间存在线性关系，即 <code>t=f(d)</code>，在坐标图中划出以上几点，求出关系函数。</li>
+<li>根据距离和关系函数算出按压时间，通过<code>adb</code>发送按压命令。</li>
+</ul>
+<h1 id="知识准备"><a href="#知识准备" class="headerlink" title="知识准备"></a>知识准备</h1><h2 id="adb协议"><a href="#adb协议" class="headerlink" title="adb协议"></a><code>adb</code>协议</h2><p><code>Android Debug Bridge</code>是对所有连接到开发机器上的<code>android</code>真机和模拟器进行跟踪管理，实现了大量控制命令，方便<code>PC</code>端通过命令行或者助手类程序来控制<code>Android</code>设备。简而言之，是PC端和<code>Android</code>设备通信的中间桥。<br><code>adb</code>协议有很多实现方式，这里用的是<code>vidstige</code>的<code>java</code>实现:<a href="https://github.com/vidstige/jadb" target="_blank" rel="noopener">(https://github.com/vidstige/jadb)</a></p>
+<h1 id="图像分析基础"><a href="#图像分析基础" class="headerlink" title="图像分析基础"></a>图像分析基础</h1><h1 id="java实现"><a href="#java实现" class="headerlink" title="java实现"></a>java实现</h1><h2 id="模拟按压的实现"><a href="#模拟按压的实现" class="headerlink" title="模拟按压的实现"></a>模拟按压的实现</h2><p>这里将模拟按压实现为一个<code>Server</code>，等待<code>client</code>的输入，可以是图像分析获取点距的自动输入，也可以是鼠标测量的手动输入。</p>
+<pre><code class="java"><span class="keyword">package</span> jiges.github;
+
+<span class="keyword">import</span> se.vidstige.jadb.JadbConnection;
+<span class="keyword">import</span> se.vidstige.jadb.JadbDevice;
+<span class="keyword">import</span> se.vidstige.jadb.JadbException;
+
+<span class="keyword">import</span> java.io.*;
+<span class="keyword">import</span> java.net.ServerSocket;
+<span class="keyword">import</span> java.net.Socket;
+<span class="keyword">import</span> java.text.DecimalFormat;
+<span class="keyword">import</span> java.util.List;
+<span class="keyword">import</span> java.util.concurrent.TimeUnit;
+
+<span class="comment">/**</span>
+<span class="comment"> * 模拟按压服务</span>
+<span class="comment"> * Created by ccr at 2018/1/3.</span>
+<span class="comment"> */</span>
+<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PressServer</span> </span>{
+
+    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>{
+
+        JadbConnection jadb = <span class="keyword">null</span>;
+        DataInputStream reader = <span class="keyword">null</span>;
+        DataOutputStream writer = <span class="keyword">null</span>;
+        <span class="keyword">try</span> {
+            jadb = <span class="keyword">new</span> JadbConnection();
+            List&lt;JadbDevice&gt; devices = jadb.getDevices();
+            JadbDevice device = devices.get(<span class="number">0</span>);
+            ServerSocket serverSocket = <span class="keyword">new</span> ServerSocket(<span class="number">8899</span>);
+            <span class="keyword">while</span> (<span class="keyword">true</span>) {
+                System.out.print(<span class="string">"等待输入:"</span>);
+                Socket client = serverSocket.accept();
+                reader = <span class="keyword">new</span> DataInputStream(client.getInputStream());
+                writer = <span class="keyword">new</span> DataOutputStream(client.getOutputStream());
+                String input = reader.readUTF();
+                System.out.println(input);
+                <span class="keyword">int</span> d = Integer.valueOf(input);
+                <span class="comment">//计算按压时间</span>
+                <span class="keyword">double</span> time = d * <span class="number">1.565</span>;
+                DecimalFormat df = <span class="keyword">new</span> DecimalFormat(<span class="string">"0"</span>);
+                <span class="comment">//发送按压指令</span>
+                device.executeShell(<span class="string">"input"</span>,<span class="string">"touchscreen"</span>,<span class="string">"swipe"</span>,<span class="string">"200"</span>,<span class="string">"200"</span>,<span class="string">"200"</span>,<span class="string">"200"</span>,String.valueOf(df.format(time)));
+                <span class="comment">//睡眠一定时间后才返回，需要2s的时间完成跳跃动作</span>
+                TimeUnit.MILLISECONDS.sleep((<span class="keyword">long</span>) time + <span class="number">2000</span>);
+                writer.writeUTF(<span class="string">"OK"</span>);
+            }
+
+        } <span class="keyword">catch</span> (IOException | JadbException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+}
+</code></pre>
+<h2 id="手动和自动的按压方式"><a href="#手动和自动的按压方式" class="headerlink" title="手动和自动的按压方式"></a>手动和自动的按压方式</h2><pre><code class="java"><span class="keyword">package</span> jiges.github;
+
+<span class="keyword">import</span> jiges.github.picture.Picture;
+<span class="keyword">import</span> se.vidstige.jadb.JadbConnection;
+<span class="keyword">import</span> se.vidstige.jadb.JadbDevice;
+<span class="keyword">import</span> se.vidstige.jadb.JadbException;
+
+<span class="keyword">import</span> java.io.*;
+<span class="keyword">import</span> java.net.Socket;
+<span class="keyword">import</span> java.util.List;
+
+<span class="comment">/**</span>
+<span class="comment"> * Created by ccr at 2018/1/8.</span>
+<span class="comment"> */</span>
+<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PressClient</span> </span>{
+
+    <span class="comment">/**</span>
+<span class="comment">     * 图片分析</span>
+<span class="comment">     */</span>
+    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>{
+        JadbConnection jadb = <span class="keyword">null</span>;
+        <span class="keyword">try</span> {
+            jadb = <span class="keyword">new</span> JadbConnection();
+            List&lt;JadbDevice&gt; devices = jadb.getDevices();
+            <span class="keyword">if</span>(<span class="keyword">null</span> == devices || devices.isEmpty()) {
+                System.out.println(<span class="string">"未找到设备."</span>);
+                System.exit(<span class="number">0</span>);
+            }
+            JadbDevice device = devices.get(<span class="number">0</span>);
+            Picture picture = <span class="keyword">new</span> Picture(device);
+            <span class="keyword">while</span>(<span class="keyword">true</span>) {
+                picture.loadPicture();
+                sendCommand(picture.analyze());
+
+            }
+
+        } <span class="keyword">catch</span> (IOException | JadbException e) {
+            e.printStackTrace();
+        }
+    }
+
+    <span class="comment">/**</span>
+<span class="comment">     * 手动输入距离</span>
+<span class="comment">     */</span>
+    <span class="comment">/*public static void main(String[] args) {</span>
+<span class="comment">        BufferedReader br = null;</span>
+<span class="comment">        try {</span>
+<span class="comment">            while(true) {</span>
+<span class="comment">                //等待键盘输入</span>
+<span class="comment">                br = new BufferedReader(new InputStreamReader(System.in));</span>
+<span class="comment">                System.out.print("请输入距离:");</span>
+<span class="comment">                String input = br.readLine();</span>
+<span class="comment">                if(null != input &amp;&amp; input.equals("quit")) {</span>
+<span class="comment">                    System.exit(0);</span>
+<span class="comment">                }</span>
+<span class="comment">                sendCommand(Integer.valueOf(input));</span>
+<span class="comment">            }</span>
+<span class="comment">        } catch (IOException e) {</span>
+<span class="comment">            e.printStackTrace();</span>
+<span class="comment">        }</span>
+<span class="comment">    }*/</span>
+
+
+    <span class="comment">/**</span>
+<span class="comment">     * 发送按压命令，可将Socket提出来，不需要每次都建立连接</span>
+<span class="comment">     * <span class="doctag">@param</span> distance 距离</span>
+<span class="comment">     */</span>
+    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">sendCommand</span><span class="params">(<span class="keyword">int</span> distance)</span> </span>{
+        Socket socket = <span class="keyword">null</span>;
+        <span class="keyword">try</span> {
+            socket = <span class="keyword">new</span> Socket(<span class="string">"localhost"</span>,<span class="number">8899</span>);
+            socket.setSoTimeout(<span class="number">10000</span>);
+            DataOutputStream out = <span class="keyword">new</span> DataOutputStream(socket.getOutputStream());
+            DataInputStream in = <span class="keyword">new</span> DataInputStream(socket.getInputStream());
+            out.writeUTF(String.valueOf(distance));
+            String res = in.readUTF();
+            System.out.println(res);
+        } <span class="keyword">catch</span> (IOException e1) {
+            <span class="keyword">if</span> (socket != <span class="keyword">null</span>) {
+                <span class="keyword">try</span> {
+                    socket.close();
+                } <span class="keyword">catch</span> (IOException e2) {
+                    socket = <span class="keyword">null</span>;
+                }
+            }
+            e1.printStackTrace();
+        } <span class="keyword">finally</span> {
+            <span class="keyword">if</span> (socket != <span class="keyword">null</span>) {
+                <span class="keyword">try</span> {
+                    socket.close();
+                } <span class="keyword">catch</span> (IOException e1) {
+                    socket = <span class="keyword">null</span>;
+                }
+            }
+        }
+    }
+}
+</code></pre>
+<h2 id="图像分析和展示"><a href="#图像分析和展示" class="headerlink" title="图像分析和展示"></a>图像分析和展示</h2><pre><code class="java"><span class="keyword">package</span> jiges.github.picture;
+
+<span class="keyword">import</span> jiges.github.PressClient;
+<span class="keyword">import</span> se.vidstige.jadb.*;
+
+<span class="keyword">import</span> javax.imageio.ImageIO;
+<span class="keyword">import</span> java.awt.event.ActionEvent;
+<span class="keyword">import</span> java.awt.event.ActionListener;
+<span class="keyword">import</span> java.awt.image.BufferedImage;
+<span class="keyword">import</span> java.io.*;
+<span class="keyword">import</span> java.util.ArrayList;
+<span class="keyword">import</span> java.util.concurrent.TimeUnit;
+
+<span class="comment">/**</span>
+<span class="comment"> * 图片工具，截图，展示和图片计算</span>
+<span class="comment"> * Created by ccr at 2018/1/3.</span>
+<span class="comment"> */</span>
+<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Picture</span> </span>{
+
+    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_WIDTH = <span class="number">1080</span>;
+
+    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_HEIGHT = <span class="number">1920</span>;
+
+    <span class="comment">//小人的RGB范围</span>
+    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Rgb LITTLE_MAN_RGB_MIN = <span class="keyword">new</span> Rgb(<span class="number">43</span>,<span class="number">43</span>,<span class="number">70</span>);
+    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Rgb LITTLE_MAN_RGB_MAX = <span class="keyword">new</span> Rgb(<span class="number">60</span>,<span class="number">60</span>,<span class="number">108</span>);
+
+
+    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> LITTLE_MAN_WIDTH = <span class="number">60</span>;
+
+    <span class="keyword">private</span> JadbDevice device;
+
+    <span class="keyword">private</span> BufferedImage image;
+
+    <span class="keyword">private</span> ImageViewer imageViewer;
+
+    <span class="keyword">private</span> <span class="keyword">int</span> distance;
+
+    <span class="function"><span class="keyword">public</span> <span class="title">Picture</span><span class="params">(JadbDevice device)</span> </span>{
+        <span class="keyword">this</span>.device = device;
+    }
+
+    <span class="comment">//图片的展示</span>
+    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initImageViewer</span><span class="params">()</span> </span>{
+        <span class="keyword">this</span>.imageViewer = <span class="keyword">new</span> ImageViewer(DEFAULT_WIDTH,DEFAULT_HEIGHT);
+        <span class="keyword">this</span>.imageViewer.getRefreshBtn().addActionListener(<span class="keyword">new</span> ActionListener() {
+            <span class="meta">@Override</span>
+            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">actionPerformed</span><span class="params">(ActionEvent e)</span> </span>{
+                loadPicture();
+                imageViewer.setComputeRet(String.valueOf(analyze()));
+            }
+        });
+        <span class="keyword">this</span>.imageViewer.getComputeBtn().addActionListener(<span class="keyword">new</span> ActionListener() {
+            <span class="meta">@Override</span>
+            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">actionPerformed</span><span class="params">(ActionEvent e)</span> </span>{
+                imageViewer.setComputeRet(String.valueOf(analyze()));
+            }
+        });
+        <span class="keyword">this</span>.imageViewer.getSendBtn().addActionListener(<span class="keyword">new</span> ActionListener() {
+            <span class="meta">@Override</span>
+            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">actionPerformed</span><span class="params">(ActionEvent e)</span> </span>{
+                PressClient.sendCommand(distance);
+            }
+        });
+        <span class="keyword">this</span>.imageViewer.setVisible(<span class="keyword">true</span>);
+    }
+
+
+    <span class="comment">/**</span>
+<span class="comment">     * adb截屏，将图片加载到pc中进行分析</span>
+<span class="comment">     */</span>
+    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">loadPicture</span><span class="params">()</span></span>{
+        ByteArrayOutputStream outputStream = <span class="keyword">null</span>;
+        <span class="keyword">try</span> {
+            device.executeShell(<span class="string">"mkdir"</span>,<span class="string">"/sdcard/screenshot/"</span>);
+            device.executeShell(<span class="string">"/system/bin/screencap"</span>, <span class="string">"-p"</span>, <span class="string">"/sdcard/screenshot/screenshot.png"</span>);
+            <span class="comment">//截图只是发送命令，手机需要一定时间需要完成截屏动作，直接拉去图片可能会报错</span>
+            TimeUnit.SECONDS.sleep(<span class="number">2</span>);
+            outputStream =  <span class="keyword">new</span> ByteArrayOutputStream();
+            device.pull(<span class="keyword">new</span> RemoteFile(<span class="string">"/sdcard/screenshot/screenshot.png"</span>), outputStream);
+            <span class="keyword">if</span>(outputStream.size() &gt; <span class="number">0</span>) {
+                image = ImageIO.read(<span class="keyword">new</span> ByteArrayInputStream(outputStream.toByteArray()));
+                <span class="keyword">if</span>(<span class="keyword">null</span> != imageViewer)
+                    imageViewer.refreshImage(image);
+            }
+        } <span class="keyword">catch</span> (IOException | JadbException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    <span class="comment">/**</span>
+<span class="comment">     * 图片分析</span>
+<span class="comment">     * 1、计算小人的位置，取x坐标。</span>
+<span class="comment">     * 2、计算下一跳方块或圆盘的顶点位置，取x坐标。</span>
+<span class="comment">     * 3、根据x坐标差计算按压时间</span>
+<span class="comment">     */</span>
+    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">analyze</span><span class="params">()</span></span>{
+        Point littleManPos = <span class="keyword">this</span>.computeLittleManPosition();
+        Point nextPos = computeNextPosition(littleManPos);
+        <span class="keyword">this</span>.distance = Math.abs(nextPos.getX() - littleManPos.getX());
+        System.out.println(<span class="keyword">this</span>.distance);
+        <span class="keyword">return</span> distance;
+    }
+
+    <span class="comment">/**</span>
+<span class="comment">     * 计算小人的位置，算法：</span>
+<span class="comment">     * 1、小人的位置总在屏幕一定位置出现，为了减少计算量，假设小人总是在屏幕的1/3到2/3的位置出现。</span>
+<span class="comment">     * 2、给小人做横切线，底部最长横切线的中点即为小人的位置。</span>
+<span class="comment">     * 3、根据颜色判断，找出这条线。</span>
+<span class="comment">     * <span class="doctag">@return</span> 位置</span>
+<span class="comment">     */</span>
+    <span class="function"><span class="keyword">public</span> Point <span class="title">computeLittleManPosition</span><span class="params">()</span></span>{
+        <span class="keyword">int</span> imageWidth = image.getWidth();
+        <span class="keyword">int</span> imageHeight  = image.getHeight();
+        <span class="comment">//记录所有符合条件的线段</span>
+        java.util.List&lt;Point[]&gt; lines = <span class="keyword">new</span> ArrayList&lt;&gt;();
+        <span class="comment">//逐行扫描</span>
+        <span class="keyword">for</span>(<span class="keyword">int</span> j = imageHeight / <span class="number">3</span>;j &lt; imageHeight * <span class="number">2</span> / <span class="number">3</span> ;j++) {
+            Point[] line = <span class="keyword">new</span> Point[]{<span class="keyword">new</span> Point(<span class="number">0</span>,j),<span class="keyword">new</span> Point(<span class="number">0</span>,j)};
+            <span class="keyword">for</span>(<span class="keyword">int</span> i = image.getMinX();i &lt; imageWidth ;i++) {
+                <span class="comment">//该rgb大小4个字节，从高位到底位分别存放alpha，red，green，blue。</span>
+                <span class="keyword">int</span> rgb = image.getRGB(i,j);
+                <span class="comment">//如果颜色在小人颜色范围内，则记录首尾点</span>
+                <span class="keyword">if</span>(<span class="keyword">new</span> Rgb((rgb &gt;&gt; <span class="number">16</span>) &amp; <span class="number">0xff</span> ,(rgb &gt;&gt; <span class="number">8</span>) &amp; <span class="number">0xff</span>,rgb &amp; <span class="number">0xff</span>).isBetween(LITTLE_MAN_RGB_MIN, LITTLE_MAN_RGB_MAX)) {
+                    line[<span class="number">1</span>].setX(i);
+                } <span class="keyword">else</span> {
+                    <span class="keyword">if</span>(line[<span class="number">1</span>].getX() &gt; line[<span class="number">0</span>].getX()) {
+                        lines.add(<span class="keyword">new</span> Point[]{<span class="keyword">new</span> Point(line[<span class="number">0</span>].getX(),line[<span class="number">0</span>].getY()),<span class="keyword">new</span> Point(line[<span class="number">1</span>].getX(),line[<span class="number">1</span>].getY())});
+                    }
+                    line[<span class="number">0</span>].setX(i);
+                    line[<span class="number">1</span>].setX(i);
+                }
+            }
+        }
+        <span class="comment">//找出最长的一条</span>
+        Point[] line = <span class="keyword">new</span> Point[]{<span class="keyword">new</span> Point(<span class="number">0</span>,<span class="number">0</span>),<span class="keyword">new</span> Point(<span class="number">0</span>,<span class="number">0</span>)};
+        <span class="keyword">for</span> (Point[] item : lines) {
+            <span class="keyword">if</span>(Math.abs(item[<span class="number">1</span>].getX() - item[<span class="number">0</span>].getX()) &gt; Math.abs(line[<span class="number">1</span>].getX() - line[<span class="number">0</span>].getX())) {
+                line = item;
+            }
+        }
+        Point p = <span class="keyword">new</span> Point((line[<span class="number">0</span>].getX() + line[<span class="number">1</span>].getX()) / <span class="number">2</span>,(line[<span class="number">0</span>].getY() + line[<span class="number">1</span>].getY()) / <span class="number">2</span>);
+        <span class="keyword">if</span>(<span class="keyword">null</span> != imageViewer)
+            imageViewer.showPoint(p,image);
+        <span class="comment">//返回中点</span>
+        <span class="keyword">return</span> p;
+    }
+
+    <span class="comment">/**</span>
+<span class="comment">     * 找出小人下一跳的位置</span>
+<span class="comment">     * 1、下一跳的方块或圆块的位置也总是出现在屏幕的1/3到2/3的位置。</span>
+<span class="comment">     * 2、根据底色跟方块的色差，找到方块或者圆盘的顶点。</span>
+<span class="comment">     * 3、可以根据顶点的x坐标和小人的x坐标算出按压时间</span>
+<span class="comment">     * <span class="doctag">@param</span> littleMan 小人的位置，为了解决小人的高度超过方块的高度引起的BUG</span>
+<span class="comment">     * <span class="doctag">@return</span> 位置</span>
+<span class="comment">     */</span>
+    <span class="function"><span class="keyword">public</span> Point <span class="title">computeNextPosition</span><span class="params">(Point littleMan)</span></span>{
+        <span class="keyword">int</span> imageWidth = image.getWidth();
+        <span class="keyword">int</span> imageHeight  = image.getHeight();
+        Rgb bgRgb1 = <span class="keyword">null</span>,bgRgb2 = <span class="keyword">null</span>;
+        Point point = <span class="keyword">null</span>;
+        <span class="keyword">for</span>(<span class="keyword">int</span> j = imageHeight / <span class="number">3</span>;j &lt; imageHeight * <span class="number">2</span> / <span class="number">3</span> ;j++) {
+            <span class="comment">//顶点有可能不是一个点，而是一个小线段</span>
+            Point[] line = <span class="keyword">new</span> Point[]{<span class="keyword">new</span> Point(<span class="number">0</span>,j),<span class="keyword">new</span> Point(<span class="number">0</span>,j)};
+
+            <span class="keyword">for</span>(<span class="keyword">int</span> i = image.getMinX();i &lt; imageWidth ;i++) {
+                <span class="comment">//解决小人的高度超过方块的高度引起的BUG</span>
+                <span class="comment">//以小人的x坐标为终点，左右LITTLE_MAN_WIDTH像素的位置不扫描</span>
+                <span class="keyword">if</span>(i &gt; littleMan.getX() - LITTLE_MAN_WIDTH &amp;&amp; i &lt; littleMan.getX() + LITTLE_MAN_WIDTH) {
+                    <span class="keyword">continue</span>;
+                }
+                <span class="comment">//该rgb大小4个字节，从高位到底位分别存放alpha，red，green，blue。</span>
+                <span class="keyword">int</span> rgb = image.getRGB(i,j);
+                <span class="comment">//记录底色的rgb值,底色并不是纯色，所以底色是一个范围，设范围在20以内</span>
+                <span class="keyword">if</span>(i == image.getMinX()) {
+                    bgRgb1 = <span class="keyword">new</span> Rgb(((rgb &gt;&gt; <span class="number">16</span>) &amp; <span class="number">0xff</span>) - <span class="number">10</span> ,((rgb &gt;&gt; <span class="number">8</span>) &amp; <span class="number">0xff</span>) - <span class="number">10</span>,(rgb &amp; <span class="number">0xff</span>) - <span class="number">10</span>);
+                    bgRgb2 = <span class="keyword">new</span> Rgb(((rgb &gt;&gt; <span class="number">16</span>) &amp; <span class="number">0xff</span>) + <span class="number">10</span> ,((rgb &gt;&gt; <span class="number">8</span>) &amp; <span class="number">0xff</span>) + <span class="number">10</span>,(rgb &amp; <span class="number">0xff</span>) + <span class="number">10</span>);
+                }
+                <span class="comment">//如果颜色在小人颜色范围内，则记录首尾点</span>
+                <span class="keyword">if</span>(!<span class="keyword">new</span> Rgb((rgb &gt;&gt; <span class="number">16</span>) &amp; <span class="number">0xff</span> ,(rgb &gt;&gt; <span class="number">8</span>) &amp; <span class="number">0xff</span>,rgb &amp; <span class="number">0xff</span>).isBetween(bgRgb1,bgRgb2)) {
+                    <span class="comment">//解决小人高于方块时的bug</span>
+                    line[<span class="number">1</span>].setX(i);
+                } <span class="keyword">else</span> {
+                    <span class="keyword">if</span>(line[<span class="number">1</span>].getX() &gt; line[<span class="number">0</span>].getX()) {
+                        <span class="keyword">break</span>;
+                    }
+                    line[<span class="number">0</span>].setX(i);
+                    line[<span class="number">1</span>].setX(i);
+                }
+            }
+            <span class="keyword">if</span>(line[<span class="number">1</span>].getX() &gt; line[<span class="number">0</span>].getX()) {
+                point = <span class="keyword">new</span> Point((line[<span class="number">0</span>].getX() + line[<span class="number">1</span>].getX()) / <span class="number">2</span>,(line[<span class="number">0</span>].getY() + line[<span class="number">1</span>].getY()) / <span class="number">2</span>);
+                <span class="keyword">break</span>;
+            }
+        }
+        <span class="comment">//标记绿色</span>
+        <span class="keyword">if</span>(<span class="keyword">null</span> != imageViewer)
+            imageViewer.showPoint(point,image);
+        <span class="keyword">return</span> point;
+    }
+
+}
+</code></pre>
+<h3 id="截图并读取图片"><a href="#截图并读取图片" class="headerlink" title="截图并读取图片"></a>截图并读取图片</h3><p>图像获取是由<code>adb</code>发送截图命令，再将截图读取到内存中进行分析。期间遇到获取图片偶尔失败的问题，是因为截图命令发送后，<code>Android</code>设备要进行截图操作，截图操作和图片拉取是异步的，<code>adb</code>并未提供回调，所以导致拉取图片失败。读取图片是通过<code>adb``sync</code>模式实现的。</p>
+<h3 id="图片分析"><a href="#图片分析" class="headerlink" title="图片分析"></a>图片分析</h3><p>图片分析的原理已经写在注释里，有几个地方要注意下。<br>计算小人底座中心点是根据颜色范围去确定的，在处理有污水井盖的圆块时，有“小人”以外的区域颜色和小人的颜色相同（如下图），这里的处理方法是，取颜色范围的横切线，收集到的所有横切线中，最长的那条线的中点就是小人的位置。<br><img src="小人.png" alt="小人.png"><br>下一跳计算也是做横切线，第一次遇到与背景色不同的线段即为顶点线段，其中点就是顶点，但在扫描时，小人有时候会高过下一跳方块，这导致下一跳的顶点落在小人的头顶上，这里的做法是，以小人中心位置向左右各60像素的区域不进行扫描。<br><img src="找点.png" alt="找点.png"></p>
+<h1 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h1><p>由于各个手机不同，按压系数，扫描颜色的范围，屏幕宽度等各不相同，可以慢慢调节。</p>
+<ul>
+<li>安装<code>UniversalAdbDriver</code>,即<code>adb</code>驱动</li>
+<li>先运行<code>PressServer</code>。</li>
+<li>在选择手动或者自动的方式启动<code>PressClient</code>.运行<code>ImageView</code>可以加载图片手动取点。</li>
+<li>源码位置(<a href="https://github.com/jiges/weixin-jump" target="_blank" rel="noopener">https://github.com/jiges/weixin-jump</a>)</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/java/" rel="tag"># java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/15/JVM启动流程-源码分析/" rel="next" title="JVM启动流程(源码分析)">
+                <i class="fa fa-chevron-left"></i> JVM启动流程(源码分析)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/07/五大IO模型/" rel="prev" title="五大IO模型">
+                五大IO模型 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div onclick="showGitment()" id="gitment-display-button">显示 Gitment 评论</div>
+        <div id="gitment-container" style="display:none"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/gougou.jpg"
+                alt="鸡哥" />
+            
+              <p class="site-author-name" itemprop="name">鸡哥</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/jiges" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i></a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:ccr12312@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i></a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#原理"><span class="nav-number">1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#知识准备"><span class="nav-number">2.</span> <span class="nav-text">知识准备</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#adb协议"><span class="nav-number">2.1.</span> <span class="nav-text">adb协议</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#图像分析基础"><span class="nav-number">3.</span> <span class="nav-text">图像分析基础</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#java实现"><span class="nav-number">4.</span> <span class="nav-text">java实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#模拟按压的实现"><span class="nav-number">4.1.</span> <span class="nav-text">模拟按压的实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#手动和自动的按压方式"><span class="nav-number">4.2.</span> <span class="nav-text">手动和自动的按压方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图像分析和展示"><span class="nav-number">4.3.</span> <span class="nav-text">图像分析和展示</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#截图并读取图片"><span class="nav-number">4.3.1.</span> <span class="nav-text">截图并读取图片</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图片分析"><span class="nav-number">4.3.2.</span> <span class="nav-text">图片分析</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#运行"><span class="nav-number">5.</span> <span class="nav-text">运行</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">鸡哥</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'jiges',
+            repo: 'jiges.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '3bfafe08bfcef158878f09910c6a9f2aef7391de',
+            
+                client_id: 'c41b93a72f2b21dcc1ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      function showGitment(){
+        document.getElementById("gitment-display-button").style.display = "none";
+        document.getElementById("gitment-container").style.display = "block";
+        renderGitment();
+      }
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("paa9xqTl09B7K7pJzx3tI8A7-gzGzoHsz", "Tt2YuM3CWPcI5gNeGiQR9qeh");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

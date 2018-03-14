@@ -1,0 +1,2377 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OpenJDK,jvm," />
+
+
+
+
+
+
+
+
+
+
+<meta name="keywords" content="OpenJDK,jvm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM启动流程(源码分析)">
+<meta property="og:url" content="https://jiges.github.io/2017/12/15/JVM启动流程-源码分析/index.html">
+<meta property="og:site_name" content="鸡哥の博客">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://jiges.github.io/2017/12/15/JVM启动流程-源码分析/积累.jpg">
+<meta property="og:updated_time" content="2017-12-15T07:15:25.052Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JVM启动流程(源码分析)">
+<meta name="twitter:image" content="https://jiges.github.io/2017/12/15/JVM启动流程-源码分析/积累.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://jiges.github.io/2017/12/15/JVM启动流程-源码分析/"/>
+
+
+
+
+
+  <title>JVM启动流程(源码分析) | 鸡哥の博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">鸡哥の博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/index.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://jiges.github.io/2017/12/15/JVM启动流程-源码分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="鸡哥">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/gougou.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鸡哥の博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">JVM启动流程(源码分析)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-15T08:17:35+08:00">
+                2017-12-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/12/15/JVM启动流程-源码分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/12/15/JVM启动流程-源码分析/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/12/15/JVM启动流程-源码分析/" class="leancloud_visitors" data-flag-title="JVM启动流程(源码分析)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <img src="/2017/12/15/JVM启动流程-源码分析/积累.jpg" title="不要小看那一丢丢的知识，一天天的积累，量变终将质变">
+<a id="more"></a>
+<blockquote>
+<p>众所周知，<code>Java</code>程序的入口是在<code>main</code>方法中，然而在执行<code>main</code>方法之前，虚拟机是如何启动的？是如何找到<code>main</code>方法的？又是如何将参数传进来的？</p>
+</blockquote>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><code>java</code>程序员都知道，是通过<code>java</code>命令来运行程序的，运行程序时可以附加一些参数。具体的参数可以参考<a href="https://docs.oracle.com/javase/8/docs/technotes/tools/windows/java.html" target="_blank" rel="noopener">【Java平台标准版工具参考】</a>。<code>java</code>命令标准的命令格式是：<code>java [options] classname [args]</code> 或者 <code>java [options] -jar filename [args]</code><br>用以下示例程序来调试<code>JVM</code>：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloJNI</span> </span>&#123;</span><br><span class="line">		</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Hello Java"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//启动命令：</span></span><br><span class="line"><span class="comment">//java -d64 -server -Xss512k -cp "/home/ccr/jvm/javatest/" HelloJNI hello</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="JVM启动流程"><a href="#JVM启动流程" class="headerlink" title="JVM启动流程"></a>JVM启动流程</h1><p><code>JVM</code>的启动流程，可以分为以下几步：</p>
+<ul>
+<li><code>JVM</code>运行环境的设置和检查。</li>
+<li>通过<code>CreateExecutionEnvironment</code>函数查找<code>JAVA_DLL</code>动态库是否存在，能不能访问。并设置一些变量。</li>
+<li>加载动态库，将动态库中的一些函数链接至本地变量。</li>
+<li>解析<code>[options]</code>和<code>[args]</code>参数。</li>
+<li>新建线程初始化虚拟机。</li>
+<li>加载并执行主类。</li>
+</ul>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><p>整个过程的入口是<code>/home/ccr/jvm/openjdk/jdk/src/share/bin/main.c</code>文件中的<code>main</code>函数:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> margc;</span><br><span class="line">    <span class="keyword">char</span>** margv;</span><br><span class="line">    <span class="keyword">const</span> jboolean const_javaw = <span class="number">0</span>;<span class="comment">//是否以javaw的方式启动</span></span><br><span class="line">    margc = argc;<span class="comment">//参数格式</span></span><br><span class="line">    margv = argv;<span class="comment">//接收命令行参数</span></span><br><span class="line">    <span class="keyword">return</span> JLI_Launch(margc, margv,</span><br><span class="line">			<span class="keyword">sizeof</span>(const_jargs) / <span class="keyword">sizeof</span>(<span class="keyword">char</span> *), <span class="comment">// 1</span></span><br><span class="line">			const_jargs, <span class="comment">//0x0</span></span><br><span class="line">			<span class="keyword">sizeof</span>(const_appclasspath) / <span class="keyword">sizeof</span>(<span class="keyword">char</span> *), <span class="comment">// 1</span></span><br><span class="line">			const_appclasspath,  <span class="comment">//0x0</span></span><br><span class="line">			FULL_VERSION, <span class="comment">// 1.8.0-internal-debug-ccr_2017_11_08_15_43-b00</span></span><br><span class="line">			DOT_VERSION, <span class="comment">// "1.8"</span></span><br><span class="line">			(const_progname != <span class="literal">NULL</span>) ? const_progname : *margv,  <span class="comment">//const_progname=java</span></span><br><span class="line">			(const_launcher != <span class="literal">NULL</span>) ? const_launcher : *margv, <span class="comment">//const_launcher = openjdk</span></span><br><span class="line">			(const_jargs != <span class="literal">NULL</span>) ? JNI_TRUE : JNI_FALSE, <span class="comment">//const_jargs = 0x0</span></span><br><span class="line">			const_cpwildcard, const_javaw, const_ergo_class); </span><br><span class="line">			<span class="comment">// const_cpwildcard = 1 '\\001'  const_javaw = 0  const_ergo_class = 0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>JLI_Launch</code>函数定义在<code>/home/ccr/jvm/openjdk/jdk/src/share/bin/java.c</code>文件中。该函数是<code>jvm</code>启动的前半部分，加载动态库。解析参数。</p>
+<pre><code class="c++"><span class="function"><span class="keyword">int</span> <span class="title">JLI_Launch</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> ** argv,              <span class="comment">/* main argc, argc */</span></span></span>
+<span class="function"><span class="params">        <span class="keyword">int</span> jargc, <span class="keyword">const</span> <span class="keyword">char</span>** jargv,          <span class="comment">/* java args */</span></span></span>
+<span class="function"><span class="params">        <span class="keyword">int</span> appclassc, <span class="keyword">const</span> <span class="keyword">char</span>** appclassv,  <span class="comment">/* app classpath */</span></span></span>
+<span class="function"><span class="params">        <span class="keyword">const</span> <span class="keyword">char</span>* fullversion,                <span class="comment">/* full version defined */</span></span></span>
+<span class="function"><span class="params">        <span class="keyword">const</span> <span class="keyword">char</span>* dotversion,                 <span class="comment">/* dot version defined */</span></span></span>
+<span class="function"><span class="params">        <span class="keyword">const</span> <span class="keyword">char</span>* pname,                      <span class="comment">/* program name */</span></span></span>
+<span class="function"><span class="params">        <span class="keyword">const</span> <span class="keyword">char</span>* lname,                      <span class="comment">/* launcher name */</span></span></span>
+<span class="function"><span class="params">        jboolean javaargs,                      <span class="comment">/* JAVA_ARGS */</span></span></span>
+<span class="function"><span class="params">        jboolean cpwildcard,                    <span class="comment">/* classpath wildcard*/</span></span></span>
+<span class="function"><span class="params">        jboolean javaw,                         <span class="comment">/* windows-only javaw */</span></span></span>
+<span class="function"><span class="params">        jint ergo                               <span class="comment">/* ergonomics class policy */</span></span></span>
+<span class="function"><span class="params">)</span></span>
+<span class="function"></span>{
+    <span class="comment">//enum LaunchMode {               // cf. sun.launcher.LauncherHelper</span>
+    <span class="comment">//LM_UNKNOWN = 0,</span>
+    <span class="comment">//LM_CLASS,</span>
+    <span class="comment">//LM_JAR</span>
+    <span class="comment">//};</span>
+    <span class="comment">//启动模式，jar启动，还是main class 启动</span>
+    <span class="keyword">int</span> mode = LM_UNKNOWN;
+    <span class="comment">//存储启动类类名</span>
+    <span class="keyword">char</span> *what = <span class="literal">NULL</span>;
+    <span class="comment">//存储class path</span>
+    <span class="keyword">char</span> *cpath = <span class="number">0</span>;
+    <span class="comment">//主类引用</span>
+    <span class="keyword">char</span> *main_class = <span class="literal">NULL</span>;
+    <span class="keyword">int</span> ret;
+    <span class="comment">//加载JAVA_DLL时，将一些函数链接到此变量中</span>
+    InvocationFunctions ifn;
+    jlong start, end;
+    <span class="comment">// JAVA_DLL动态库路径</span>
+    <span class="keyword">char</span> jvmpath[MAXPATHLEN];
+    <span class="comment">// jre路径</span>
+    <span class="keyword">char</span> jrepath[MAXPATHLEN];
+    <span class="comment">// jvm.cfg 文件路径</span>
+    <span class="keyword">char</span> jvmcfg[MAXPATHLEN];
+
+    _fVersion = fullversion;
+    _dVersion = dotversion;
+    _launcher_name = lname;
+    _program_name = pname;
+    _is_java_args = javaargs;
+    _wc_enabled = cpwildcard;
+    _ergo_policy = ergo;
+
+    <span class="comment">//根据环境变量中的“_JAVA_LAUNCHER_DEBUG”参数来设置是否打印调试信息</span>
+    <span class="comment">//_launcher_debug = false</span>
+    InitLauncher(javaw);
+    <span class="comment">//打印一些调试信息</span>
+    DumpState();
+    <span class="keyword">if</span> (JLI_IsTraceLauncher()) {<span class="comment">//判断_launcher_debug变量</span>
+        <span class="keyword">int</span> i;
+        <span class="built_in">printf</span>(<span class="string">"Command line args:\n"</span>);
+        <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; argc ; i++) {
+            <span class="built_in">printf</span>(<span class="string">"argv[%d] = %s\n"</span>, i, argv[i]);
+        }
+        AddOption(<span class="string">"-Dsun.java.launcher.diag=true"</span>, <span class="literal">NULL</span>);
+    }
+
+    <span class="comment">/*</span>
+<span class="comment">     * Make sure the specified version of the JRE is running.</span>
+<span class="comment">     *</span>
+<span class="comment">     * There are three things to note about the SelectVersion() routine:</span>
+<span class="comment">     *  1) If the version running isn't correct, this routine doesn't</span>
+<span class="comment">     *     return (either the correct version has been exec'd or an error</span>
+<span class="comment">     *     was issued).</span>
+<span class="comment">     *  2) Argc and Argv in this scope are *not* altered by this routine.</span>
+<span class="comment">     *     It is the responsibility of subsequent code to ignore the</span>
+<span class="comment">     *     arguments handled by this routine.</span>
+<span class="comment">     *  3) As a side-effect, the variable "main_class" is guaranteed to</span>
+<span class="comment">     *     be set (if it should ever be set).  This isn't exactly the</span>
+<span class="comment">     *     poster child for structured programming, but it is a small</span>
+<span class="comment">     *     price to pay for not processing a jar file operand twice.</span>
+<span class="comment">     *     (Note: This side effect has been disabled.  See comment on</span>
+<span class="comment">     *     bugid 5030265 below.)</span>
+<span class="comment">     */</span>
+     <span class="comment">//需要指定版本的jre才能运行，通过命令行“-version:”命令，或者读取jar文件的mainfest文件</span>
+     <span class="comment">//查看链接详情</span>
+    SelectVersion(argc, argv, &amp;main_class);
+
+    <span class="comment">//准备环境，搜索jrepath和jvmpath，具体实现在下面找</span>
+    CreateExecutionEnvironment(&amp;argc, &amp;argv,
+                               jrepath, <span class="keyword">sizeof</span>(jrepath),
+                               jvmpath, <span class="keyword">sizeof</span>(jvmpath),
+                               jvmcfg,  <span class="keyword">sizeof</span>(jvmcfg));
+    <span class="comment">//动态链接库中的一些函数</span>
+    <span class="comment">//创建虚拟机</span>
+    ifn.CreateJavaVM = <span class="number">0</span>;
+    <span class="comment">//获取默认初始化参数</span>
+    ifn.GetDefaultJavaVMInitArgs = <span class="number">0</span>;
+
+    <span class="keyword">if</span> (JLI_IsTraceLauncher()) {
+        start = CounterGet();
+    }
+
+    <span class="comment">//加载JAVA_DLL到内存，并将动态库中的函数链接至ifn.CreateJavaVM，ifn.CreateJavaVM，ifn.GetCreatedJavaVMs</span>
+    <span class="keyword">if</span> (!LoadJavaVM(jvmpath, &amp;ifn)) {
+        <span class="keyword">return</span>(<span class="number">6</span>);
+    }
+
+    <span class="keyword">if</span> (JLI_IsTraceLauncher()) {
+        end   = CounterGet();
+    }
+
+    JLI_TraceLauncher(<span class="string">"%ld micro seconds to LoadJavaVM\n"</span>,
+             (<span class="keyword">long</span>)(jint)Counter2Micros(end-start));
+
+    ++argv;
+    --argc;
+
+    <span class="keyword">if</span> (IsJavaArgs()) {
+        <span class="comment">/* Preprocess wrapper arguments */</span>
+        TranslateApplicationArgs(jargc, jargv, &amp;argc, &amp;argv);
+        <span class="keyword">if</span> (!AddApplicationOptions(appclassc, appclassv)) {
+            <span class="keyword">return</span>(<span class="number">1</span>);
+        }
+    } <span class="keyword">else</span> {
+        <span class="comment">/* Set default CLASSPATH */</span>
+        cpath = getenv(<span class="string">"CLASSPATH"</span>);
+        <span class="keyword">if</span> (cpath == <span class="literal">NULL</span>) {
+            cpath = <span class="string">"."</span>;
+        }
+        <span class="comment">//设置CLASSPATH</span>
+        <span class="comment">//调用AddOption函数 将"-Djava.class.path=."字符串插入到JavaVMOption *options变量中</span>
+        SetClassPath(cpath);
+    }
+
+    <span class="comment">/* Parse command line options; if the return value of</span>
+<span class="comment">     * ParseArguments is false, the program should exit.</span>
+<span class="comment">     */</span>
+     <span class="comment">//解析所有option参数，并将其存到JavaVMOption *options变量中</span>
+    <span class="keyword">if</span> (!ParseArguments(&amp;argc, &amp;argv, &amp;mode, &amp;what, &amp;ret, jrepath))
+    {
+        <span class="keyword">return</span>(ret);
+    }
+
+    <span class="comment">/* Override class path if -jar flag was specified */</span>
+    <span class="comment">//-jar模式</span>
+    <span class="keyword">if</span> (mode == LM_JAR) {
+        SetClassPath(what);     <span class="comment">/* Override class path */</span>
+    }
+
+    <span class="comment">/* set the -Dsun.java.command pseudo property */</span>
+    <span class="comment">//设置用来向java main方法暴露类名和参数，或者为java main存储方法名和参数</span>
+    <span class="comment">//"-Dsun.java.command=HelloJNI hello"</span>
+    SetJavaCommandLineProp(what, argc, argv);
+
+    <span class="comment">/* Set the -Dsun.java.launcher pseudo property */</span>
+    SetJavaLauncherProp();
+
+    <span class="comment">/* set the -Dsun.java.launcher.* platform properties */</span>
+    SetJavaLauncherPlatformProps();
+
+    <span class="comment">//处理splash screen，开启新线程去初始化JVM</span>
+    <span class="keyword">return</span> JVMInit(&amp;ifn, threadStackSize, argc, argv, mode, what, ret);
+}
+</code></pre>
+<h2 id="环境准备动态库查找"><a href="#环境准备动态库查找" class="headerlink" title="环境准备动态库查找"></a>环境准备动态库查找</h2><p>准备环境，搜索<code>jrepath</code>和<code>jvmpath</code>的实现在<code>/home/ccr/jvm/openjdk/jdk/src/solaris/bin/java_md_solinux.c</code>文件中，该函数做了一些参数的检查，如<code>-d32</code>和<code>-d64</code>，如果和平台支持的数据模型不符，就会退出。然后通过<code>GetJREPath</code>函数，获取<code>JRE</code>路径，在读取<code>jvm.cfg</code>文件。改文件记录了<code>jvm</code>以何种类型启动(<code>-server</code>、<code>-client</code>等)，<code>-Server VM</code>启动慢，但是一旦运行起来后，性能将会有很大的提升。<code>-Client VM</code>启动快，运行相对较慢。文件记录的默认是<code>-server</code>类型。然后在获取<code>JAVA_DLL</code>的路径，在<code>Linux</code>上表现为<code>libjava.so</code>路径,在<code>windows</code>上是<code>jvm.dll</code>路径。另外该函数还检查了<code>LD_LIBRARY_PATH</code>环境变量，用户也可以通过这个环境变量来指定动态库文件。</p>
+<pre><code class="c++"><span class="function"><span class="keyword">void</span> <span class="title">CreateExecutionEnvironment</span><span class="params">(<span class="keyword">int</span> *pargc, <span class="keyword">char</span> ***pargv,</span></span>
+<span class="function"><span class="params">                           <span class="keyword">char</span> jrepath[], jint so_jrepath,</span></span>
+<span class="function"><span class="params">                           <span class="keyword">char</span> jvmpath[], jint so_jvmpath,</span></span>
+<span class="function"><span class="params">                           <span class="keyword">char</span> jvmcfg[],  jint so_jvmcfg)</span></span>{
+    <span class="comment">//通过Linux的“/proc/self/exe”机制读取进程可执行文件（java）的绝对路径并将其塞进execname变量</span>
+    <span class="comment">//“/home/ccr/jvm/openjdk/build/linux-x86_64-normal-server-slowdebug/jdk/bin/java”</span>
+    SetExecname(*pargv); 
+    {        
+        <span class="keyword">char</span> *arch        = (<span class="keyword">char</span> *)GetArchPath( ( <span class="number">8</span> * <span class="keyword">sizeof</span>(<span class="keyword">void</span>*)) ); <span class="comment">//获取系统的属性  amd64</span>
+        <span class="keyword">char</span> * jvmtype    = <span class="literal">NULL</span>;
+        <span class="keyword">int</span>  argc         = *pargc;
+        <span class="keyword">char</span> **argv       = *pargv; <span class="comment">//命令行参数</span>
+        <span class="keyword">int</span> running       = ( <span class="number">8</span> * <span class="keyword">sizeof</span>(<span class="keyword">void</span>*)); <span class="comment">// 64</span>
+
+        <span class="keyword">int</span> wanted        = running;      <span class="comment">/* What data mode is being</span>
+<span class="comment">                                           asked for? Current model is</span>
+<span class="comment">                                           fine unless another model</span>
+<span class="comment">                                           is asked for */</span>
+        jboolean mustsetenv = <span class="number">0</span>;
+        <span class="keyword">char</span> *runpath     = ((<span class="keyword">void</span> *)<span class="number">0</span>); <span class="comment">/* existing effective LD_LIBRARY_PATH setting */</span>
+        <span class="keyword">char</span>* new_runpath = ((<span class="keyword">void</span> *)<span class="number">0</span>); <span class="comment">/* desired new LD_LIBRARY_PATH string */</span>
+        <span class="keyword">char</span>* newpath     = ((<span class="keyword">void</span> *)<span class="number">0</span>); <span class="comment">/* path on new LD_LIBRARY_PATH */</span>
+        <span class="keyword">char</span>* lastslash   = ((<span class="keyword">void</span> *)<span class="number">0</span>);
+        <span class="keyword">char</span>** newenvp    = ((<span class="keyword">void</span> *)<span class="number">0</span>); <span class="comment">/* current environment */</span>
+
+        <span class="keyword">char</span>** newargv    = ((<span class="keyword">void</span> *)<span class="number">0</span>);
+        <span class="keyword">int</span>    newargc    = <span class="number">0</span>;
+
+
+      <span class="comment">/*</span>
+<span class="comment">       * Starting in 1.5, all unix platforms accept the -d32 and -d64</span>
+<span class="comment">       * options.  On platforms where only one data-model is supported</span>
+<span class="comment">       * (e.g. ia-64 Linux), using the flag for the other data model is</span>
+<span class="comment">       * an error and will terminate the program.</span>
+<span class="comment">       */</span>
+       <span class="comment">//从1.5版本开始，所有Unix平台接收-d32和-d64操作，一种平台只能支持一种数据模型，用另外一种就会报错</span>
+       <span class="comment">//这一整段代码目的是：看看命令行参数中有没有-d32和-d64，有就记录下来，然后删除这个参数</span>
+       { <span class="comment">/* open new scope to declare local variables */</span>
+        <span class="keyword">int</span> i;
+
+        newargv = (<span class="keyword">char</span> **)JLI_MemAlloc((argc+<span class="number">1</span>) * <span class="keyword">sizeof</span>(<span class="keyword">char</span>*));
+        newargv[newargc++] = argv[<span class="number">0</span>];
+
+        <span class="comment">/* scan for data model arguments and remove from argument list;</span>
+<span class="comment">           last occurrence determines desired data model */</span>
+        <span class="comment">//扫描所有参数，删除数据模型的参数。strcmp是字符串比较</span>
+        <span class="keyword">for</span> (i=<span class="number">1</span>; i &lt; argc; i++) {
+
+          <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( argv[i] ), ( <span class="string">"-J-d64"</span> )) == <span class="number">0</span> || <span class="built_in">strcmp</span>(( argv[i] ), ( <span class="string">"-d64"</span> )) == <span class="number">0</span>) {
+            wanted = <span class="number">64</span>;
+            <span class="keyword">continue</span>;
+          }
+          <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( argv[i] ), ( <span class="string">"-J-d32"</span> )) == <span class="number">0</span> || <span class="built_in">strcmp</span>(( argv[i] ), ( <span class="string">"-d32"</span> )) == <span class="number">0</span>) {
+            wanted = <span class="number">32</span>;
+            <span class="keyword">continue</span>;
+          }
+          newargv[newargc++] = argv[i];
+          <span class="comment">//false，判断_is_java_args变量，JLI_Launch中初始化，由main传入</span>
+          <span class="keyword">if</span> (IsJavaArgs()) {
+            <span class="keyword">if</span> (argv[i][<span class="number">0</span>] != <span class="string">'-'</span>) <span class="keyword">continue</span>;
+          } <span class="keyword">else</span> {
+            <span class="comment">//java 标准参数格式java [ options ] classname [ args ] 或者 java [ options ] -jar 文件名 [ args ]</span>
+            <span class="comment">//-classpath或-cp出现说明options结束，剩下的是类名和参数</span>
+            <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( argv[i] ), ( <span class="string">"-classpath"</span> )) == <span class="number">0</span> || <span class="built_in">strcmp</span>(( argv[i] ), ( <span class="string">"-cp"</span> )) == <span class="number">0</span>) {
+              i++;
+              <span class="keyword">if</span> (i &gt;= argc) <span class="keyword">break</span>;
+              newargv[newargc++] = argv[i];
+              <span class="keyword">continue</span>;
+            }
+            <span class="comment">//options结束的标志，除了-cp 后面的参数</span>
+            <span class="keyword">if</span> (argv[i][<span class="number">0</span>] != <span class="string">'-'</span>) { i++; <span class="keyword">break</span>; }
+          }
+        }
+
+        <span class="comment">/* copy rest of args [i .. argc) */</span>
+        <span class="comment">//拷贝剩余的参数</span>
+        <span class="keyword">while</span> (i &lt; argc) {
+          newargv[newargc++] = argv[i++];
+        }    
+        newargv[newargc] = <span class="literal">NULL</span>;
+
+        <span class="comment">/*</span>
+<span class="comment">         * newargv has all proper arguments here</span>
+<span class="comment">         */</span>
+
+        argc = newargc;
+        argv = newargv;
+      }        
+       <span class="comment">/* If the data model is not changing, it is an error if the</span>
+<span class="comment">         jvmpath does not exist */</span>
+      <span class="keyword">if</span> (wanted == running) {
+        <span class="comment">/* Find out where the JRE is that we will be using. */</span>
+        <span class="comment">//获取JRE路径</span>
+        <span class="keyword">if</span> (!GetJREPath(jrepath, so_jrepath, arch, <span class="number">0</span>) ) {
+          JLI_ReportErrorMessage(<span class="string">"Error: Could not find Java SE Runtime Environment."</span>);
+          <span class="built_in">exit</span>(<span class="number">2</span>);
+        }
+        <span class="comment">//jvm.cfg 路径  "/home/ccr/jvm/openjdk/build/linux-x86_64-normal-server-slowdebug/jdk/lib/amd64/jvm.cfg"</span>
+        <span class="built_in">snprintf</span>(jvmcfg, so_jvmcfg, <span class="string">"%s%slib%s%s%sjvm.cfg"</span>,
+                     jrepath, <span class="string">"/"</span>, <span class="string">"/"</span>,  arch, <span class="string">"/"</span>);
+        <span class="comment">/* Find the specified JVM type */</span>
+        <span class="comment">//读取jvm.cfg的配置文件，填充knownVMs变量，knownVMs数据结构在下面</span>
+        <span class="keyword">if</span> (ReadKnownVMs(jvmcfg, <span class="number">0</span>) &lt; <span class="number">1</span>) {
+          JLI_ReportErrorMessage(<span class="string">"Error: no known VMs. (check for corrupt jvm.cfg file)"</span>);
+          <span class="built_in">exit</span>(<span class="number">1</span>);
+        }
+
+        jvmpath[<span class="number">0</span>] = <span class="string">'\0'</span>;
+        <span class="comment">//检查JVM的类型，如果命令行没有给出类型（指的是 -client 或者 -server参数），</span>
+        <span class="comment">//则会检查"JDK_ALTERNATE_VM"环境变量或者命令行'-XXaltjvm='参数。</span>
+        <span class="comment">//如果都没有指定，则使用默认的类型（定义在jvm.cfg配置文件中）</span>
+        jvmtype = CheckJvmType(pargc, pargv, <span class="number">0</span>);
+        <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( jvmtype ), ( <span class="string">"ERROR"</span> )) == <span class="number">0</span>) {
+            JLI_ReportErrorMessage(<span class="string">"Error: could not determine JVM type."</span>);
+            <span class="built_in">exit</span>(<span class="number">4</span>);
+        }
+
+        <span class="comment">//获取JAVA_DLL路径  "/home/ccr/jvm/openjdk/build/linux-x86_64-normal-server-slowdebug/jdk/lib/amd64/server/libjvm.so"</span>
+        <span class="keyword">if</span> (!GetJVMPath(jrepath, jvmtype, jvmpath, so_jvmpath, arch, <span class="number">0</span> )) {
+          JLI_ReportErrorMessage(<span class="string">"Error: missing `%s' JVM at `%s'.\nPlease install or use the JRE or JDK that contains these missing components."</span>, jvmtype, jvmpath);
+          <span class="built_in">exit</span>(<span class="number">4</span>);
+        }
+        <span class="comment">/*</span>
+<span class="comment">         * we seem to have everything we need, so without further ado</span>
+<span class="comment">         * we return back, otherwise proceed to set the environment.</span>
+<span class="comment">         */</span>
+        <span class="comment">//测试所有需要的环境变量是否被设置，主要检查"LD_LIBRARY_PATH"环境变量，</span>
+        <span class="comment">//LD_LIBRARY_PATH环境变量用于在程序加载运行期间查找动态链接库时指定除了系统默认路径之外的其他路径</span>
+        <span class="comment">//实现中的一句注释  no environment variable is a good environment variable</span>
+        mustsetenv = RequiresSetenv(wanted, jvmpath);
+        JLI_TraceLauncher(<span class="string">"mustsetenv: %s\n"</span>, mustsetenv ? <span class="string">"TRUE"</span> : <span class="string">"FALSE"</span>);
+
+        <span class="keyword">if</span> (mustsetenv == <span class="number">0</span>) {
+            JLI_MemFree(newargv);
+            <span class="keyword">return</span>;
+        }
+      } <span class="keyword">else</span> {  <span class="comment">/* do the same speculatively or exit */</span>
+        JLI_ReportErrorMessage(<span class="string">"Error: This Java instance does not support a %d-bit JVM.\nPlease install the desired version."</span>, wanted);
+        <span class="built_in">exit</span>(<span class="number">1</span>);
+      }
+      <span class="comment">//设置了LD_LIBRARY_PATH环境变量，并且目录中存在lib/$LIBARCH/{server,client}/libjvm.so文件</span>
+      <span class="keyword">if</span> (mustsetenv) {
+            ......
+        }
+
+        <span class="built_in">exit</span>(<span class="number">1</span>);
+    }
+}
+</code></pre>
+<p>函数<code>GetJREPath</code>使用来获取<code>JRE</code>路径的。在<code>CreateExecutionEnvironment</code>函数中，通过调用<code>SetExecname</code>函数将可执行文件的绝对路径塞进<code>execname</code>变量，比如这里是<code>jdkpath/jdk/bin/java</code>。经过简单处理后得到<code>jdkpath/jdk</code>。该函数还检查了链接库的访问权限。</p>
+<pre><code class="c++"><span class="comment">/*</span>
+<span class="comment"> * Find path to JRE based on .exe's location or registry settings.</span>
+<span class="comment"> */</span>
+<span class="function"><span class="keyword">static</span> jboolean <span class="title">GetJREPath</span><span class="params">(<span class="keyword">char</span> *path, jint pathsize, <span class="keyword">const</span> <span class="keyword">char</span> * arch, jboolean speculative)</span></span>
+<span class="function"></span>{
+    <span class="keyword">char</span> libjava[<span class="number">4096</span>];
+    <span class="comment">//找到JDK路径并传到path变量中</span>
+    <span class="keyword">if</span> (GetApplicationHome(path, pathsize)) {
+        <span class="comment">/* Is JRE co-located with the application? */</span>
+        <span class="comment">// /home/ccr/jvm/openjdk/build/linux-x86_64-normal-server-slowdebug/jdk/lib/amd64/libjava.so</span>
+        <span class="built_in">snprintf</span>(libjava, <span class="keyword">sizeof</span>(libjava), <span class="string">"%s/lib/%s/"</span> <span class="string">"libjava.so"</span>, path, arch);
+        <span class="comment">//是否可访问</span>
+        <span class="keyword">if</span> (access(libjava, <span class="number">0</span>) == <span class="number">0</span>) {
+            JLI_TraceLauncher(<span class="string">"JRE path is %s\n"</span>, path);
+            <span class="keyword">return</span> <span class="number">1</span>;
+        }
+
+        <span class="comment">/* Does the app ship a private JRE in &lt;apphome&gt;/jre directory? */</span>
+        <span class="built_in">snprintf</span>(libjava, <span class="keyword">sizeof</span>(libjava), <span class="string">"%s/jre/lib/%s/"</span> <span class="string">"libjava.so"</span>, path, arch);
+        <span class="keyword">if</span> (access(libjava, <span class="number">0</span>) == <span class="number">0</span>) {
+            <span class="built_in">strcat</span>(( path ), ( <span class="string">"/jre"</span> ));
+            JLI_TraceLauncher(<span class="string">"JRE path is %s\n"</span>, path);
+            <span class="keyword">return</span> <span class="number">1</span>;
+        }
+    }
+
+    <span class="keyword">if</span> (!speculative)
+      JLI_ReportErrorMessage(<span class="string">"Error: could not find "</span> <span class="string">"libjava.so"</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+<span class="comment">/*</span>
+<span class="comment"> * If app is "/foo/bin/javac", or "/foo/bin/sparcv9/javac" then put</span>
+<span class="comment"> * "/foo" into buf.</span>
+<span class="comment"> */</span>
+<span class="function">jboolean <span class="title">GetApplicationHome</span><span class="params">(<span class="keyword">char</span> *buf, jint bufsize)</span></span>
+<span class="function"></span>{
+    <span class="comment">//GetExecName()直接返回execname变量，在SetExecname(*pargv)函数中初始化</span>
+    <span class="keyword">const</span> <span class="keyword">char</span> *execname = GetExecName();
+    <span class="keyword">if</span> (execname != ((<span class="keyword">void</span> *)<span class="number">0</span>)) {
+        <span class="comment">//将格式化的数据写入字符串,超出则截断</span>
+        <span class="built_in">snprintf</span>(buf, bufsize, <span class="string">"%s"</span>, execname);
+        buf[bufsize<span class="number">-1</span>] = <span class="string">'\0'</span>;
+    } <span class="keyword">else</span> {
+        <span class="keyword">return</span> <span class="number">0</span>;
+    }
+
+    <span class="comment">//strrchr(const char *str, int c) 在参数 str 所指向的字符串中搜索最后一次出现字符 c（一个无符号字符）的位置。</span>
+    <span class="keyword">if</span> (<span class="built_in">strrchr</span>(( buf ), ( <span class="string">'/'</span> )) == <span class="number">0</span>) {
+        buf[<span class="number">0</span>] = <span class="string">'\0'</span>;
+        <span class="keyword">return</span> <span class="number">0</span>;
+    }
+
+    <span class="comment">//直接截除最后一次出现'/'以及后面的字符,'/foo/bin/java'-&gt;'/foo/bin'</span>
+    *(<span class="built_in">strrchr</span>(( buf ), ( <span class="string">'/'</span> ))) = <span class="string">'\0'</span>;    <span class="comment">/* executable file      */</span>
+    <span class="comment">//strlen 计算字符串长度</span>
+    <span class="comment">//字符串长度&lt;4，其实就是找不到jdk路径</span>
+    <span class="keyword">if</span> (<span class="built_in">strlen</span>(( buf )) &lt; <span class="number">4</span> || <span class="built_in">strrchr</span>(( buf ), ( <span class="string">'/'</span> )) == <span class="number">0</span>) {
+        buf[<span class="number">0</span>] = <span class="string">'\0'</span>;
+        <span class="keyword">return</span> <span class="number">0</span>;
+    }
+    <span class="comment">//字符串比较，buf + strlen(( buf ) - 4 实际上是地址的操作或者可以理解为数组下标相加</span>
+    <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( <span class="string">"/bin"</span> ), ( buf + <span class="built_in">strlen</span>(( buf )) - <span class="number">4</span> )) != <span class="number">0</span>)
+        <span class="comment">//直接截除最后一次出现'/'以及后面的字符,'/foo/bin'-&gt;'/foo'</span>
+        <span class="comment">//这一段不理解，为什么会有这个判断，从注释看，有可能java命令不在bin目录中，而在bin/sparcv9 或者 bin/amd64目录中</span>
+        *(<span class="built_in">strrchr</span>(( buf ), ( <span class="string">'/'</span> ))) = <span class="string">'\0'</span>;        <span class="comment">/* sparcv9 or amd64     */</span>
+    <span class="keyword">if</span> (<span class="built_in">strlen</span>(( buf )) &lt; <span class="number">4</span> || <span class="built_in">strcmp</span>(( <span class="string">"/bin"</span> ), ( buf + <span class="built_in">strlen</span>(( buf )) - <span class="number">4</span> )) != <span class="number">0</span>) {
+        <span class="comment">//不可能在找到bin目录了</span>
+        buf[<span class="number">0</span>] = <span class="string">'\0'</span>;
+        <span class="keyword">return</span> <span class="number">0</span>;
+    }
+    <span class="comment">//直接截除最后一次出现'/'以及后面的字符,'/foo/bin'-&gt;'/foo'</span>
+    *(<span class="built_in">strrchr</span>(( buf ), ( <span class="string">'/'</span> ))) = <span class="string">'\0'</span>;    <span class="comment">/* bin                  */</span>
+
+    <span class="keyword">return</span> <span class="number">1</span>;
+}
+</code></pre>
+<p><code>jvm.cfg</code>文件的定义。默认选择的是<code>server</code>类型。以及<code>knownVMs</code>变量数据结构</p>
+<pre><code class="c">-server KNOWN
+-client IGNORE
+
+<span class="comment">//knownVMs变量数据结构</span>
+<span class="class"><span class="keyword">struct</span> <span class="title">vmdesc</span> {</span>
+    <span class="keyword">char</span> *name;
+    <span class="keyword">int</span> flag;
+    <span class="keyword">char</span> *alias;
+    <span class="keyword">char</span> *server_class;
+};
+<span class="keyword">enum</span> vmdesc_flag {
+    VM_UNKNOWN = <span class="number">-1</span>,
+    VM_KNOWN,
+    VM_ALIASED_TO,
+    VM_WARN,
+    VM_ERROR,
+    VM_IF_SERVER_CLASS,
+    VM_IGNORE
+};
+</code></pre>
+<h2 id="动态库加载"><a href="#动态库加载" class="headerlink" title="动态库加载"></a>动态库加载</h2><p>使用<code>dlopen</code>函数打开动态库，并将其中的<code>JNI_CreateJavaVM</code>、<code>JNI_GetDefaultJavaVMInitArgs</code>、<code>JNI_GetCreatedJavaVMs</code>函数链接至<code>ifn</code>变量中。</p>
+<pre><code class="c++"><span class="function">jboolean <span class="title">LoadJavaVM</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *jvmpath, InvocationFunctions *ifn)</span></span>
+<span class="function"></span>{
+    <span class="keyword">void</span> *libjvm;
+
+    JLI_TraceLauncher(<span class="string">"JVM path is %s\n"</span>, jvmpath);
+
+    <span class="comment">//打开动态库，立刻模式和全局模式</span>
+    libjvm = dlopen(jvmpath,  RTLD_NOW + RTLD_GLOBAL);
+    <span class="keyword">if</span> (libjvm == ((<span class="keyword">void</span> *)<span class="number">0</span>)) {
+        JLI_ReportErrorMessage(<span class="string">"Error: dl failure on line %d"</span>, <span class="number">864</span>);
+        JLI_ReportErrorMessage(<span class="string">"Error: failed %s, because %s"</span>, jvmpath, dlerror());
+        <span class="keyword">return</span> <span class="number">0</span>;
+    }
+
+    <span class="comment">//函数链接</span>
+    ifn-&gt;CreateJavaVM = (CreateJavaVM_t)
+        dlsym(libjvm, <span class="string">"JNI_CreateJavaVM"</span>);
+    <span class="keyword">if</span> (ifn-&gt;CreateJavaVM == ((<span class="keyword">void</span> *)<span class="number">0</span>)) {
+        JLI_ReportErrorMessage(<span class="string">"Error: failed %s, because %s"</span>, jvmpath, dlerror());
+        <span class="keyword">return</span> <span class="number">0</span>;
+    }
+
+    ifn-&gt;GetDefaultJavaVMInitArgs = (GetDefaultJavaVMInitArgs_t)
+        dlsym(libjvm, <span class="string">"JNI_GetDefaultJavaVMInitArgs"</span>);
+    <span class="keyword">if</span> (ifn-&gt;GetDefaultJavaVMInitArgs == ((<span class="keyword">void</span> *)<span class="number">0</span>)) {
+        JLI_ReportErrorMessage(<span class="string">"Error: failed %s, because %s"</span>, jvmpath, dlerror());
+        <span class="keyword">return</span> <span class="number">0</span>;
+    }
+
+    ifn-&gt;GetCreatedJavaVMs = (GetCreatedJavaVMs_t)
+        dlsym(libjvm, <span class="string">"JNI_GetCreatedJavaVMs"</span>);
+    <span class="keyword">if</span> (ifn-&gt;GetCreatedJavaVMs == ((<span class="keyword">void</span> *)<span class="number">0</span>)) {
+        JLI_ReportErrorMessage(<span class="string">"Error: failed %s, because %s"</span>, jvmpath, dlerror());
+        <span class="keyword">return</span> <span class="number">0</span>;
+    }
+
+    <span class="keyword">return</span> <span class="number">1</span>;
+}
+</code></pre>
+<h2 id="options解析"><a href="#options解析" class="headerlink" title="options解析"></a>options解析</h2><p>通过<code>AddOption</code>函数将所有<code>options</code>记录在<code>JavaVMOption</code>变量中。</p>
+<pre><code class="c++"><span class="function"><span class="keyword">void</span> <span class="title">AddOption</span><span class="params">(<span class="keyword">char</span> *str, <span class="keyword">void</span> *info)</span></span>
+<span class="function"></span>{
+    <span class="comment">/*</span>
+<span class="comment">     * Expand options array if needed to accommodate at least one more</span>
+<span class="comment">     * VM option.</span>
+<span class="comment">     */</span>
+    <span class="keyword">if</span> (numOptions &gt;= maxOptions) {
+        <span class="keyword">if</span> (options == <span class="number">0</span>) {
+            maxOptions = <span class="number">4</span>;
+            options = JLI_MemAlloc(maxOptions * <span class="keyword">sizeof</span>(JavaVMOption));
+        } <span class="keyword">else</span> {
+            JavaVMOption *tmp;
+            maxOptions *= <span class="number">2</span>;
+            tmp = JLI_MemAlloc(maxOptions * <span class="keyword">sizeof</span>(JavaVMOption));
+            <span class="built_in">memcpy</span>(tmp, options, numOptions * <span class="keyword">sizeof</span>(JavaVMOption));
+            JLI_MemFree(options);
+            options = tmp;
+        }
+    }
+    <span class="comment">//将参数，插入到options变量中</span>
+    options[numOptions].optionString = str;
+    options[numOptions++].extraInfo = info;
+
+    <span class="comment">//判断是否是-Xss参数，设置栈大小</span>
+    <span class="keyword">if</span> (JLI_StrCCmp(str, <span class="string">"-Xss"</span>) == <span class="number">0</span>) {
+        jlong tmp;
+        <span class="keyword">if</span> (parse_size(str + <span class="number">4</span>, &amp;tmp)) {
+            threadStackSize = tmp;
+        }
+    }
+
+    <span class="comment">//判断是否是-Xmx参数，设置最大堆内存</span>
+    <span class="keyword">if</span> (JLI_StrCCmp(str, <span class="string">"-Xmx"</span>) == <span class="number">0</span>) {
+        jlong tmp;
+        <span class="keyword">if</span> (parse_size(str + <span class="number">4</span>, &amp;tmp)) {
+            maxHeapSize = tmp;
+        }
+    }
+
+    <span class="comment">//判断是否是-Xmx参数，设置初始堆内存</span>
+    <span class="keyword">if</span> (JLI_StrCCmp(str, <span class="string">"-Xms"</span>) == <span class="number">0</span>) {
+        jlong tmp;
+        <span class="keyword">if</span> (parse_size(str + <span class="number">4</span>, &amp;tmp)) {
+           initialHeapSize = tmp;
+        }
+    }
+}
+<span class="comment">//options变量结构</span>
+<span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">JavaVMOption</span> {</span>
+    <span class="keyword">char</span> *optionString;
+    <span class="keyword">void</span> *extraInfo;
+} JavaVMOption;
+
+
+<span class="comment">//解析options</span>
+<span class="function"><span class="keyword">static</span> jboolean <span class="title">ParseArguments</span><span class="params">(<span class="keyword">int</span> *pargc, <span class="keyword">char</span> ***pargv,</span></span>
+<span class="function"><span class="params">               <span class="keyword">int</span> *pmode, <span class="keyword">char</span> **pwhat,</span></span>
+<span class="function"><span class="params">               <span class="keyword">int</span> *pret, <span class="keyword">const</span> <span class="keyword">char</span> *jrepath)</span></span>
+<span class="function"></span>{
+    <span class="keyword">int</span> argc = *pargc;
+    <span class="keyword">char</span> **argv = *pargv;
+    <span class="keyword">int</span> mode = LM_UNKNOWN;
+    <span class="keyword">char</span> *arg;
+
+    *pret = <span class="number">0</span>;
+
+    <span class="keyword">while</span> ((arg = *argv) != <span class="number">0</span> &amp;&amp; *arg == <span class="string">'-'</span>) {
+        argv++; --argc;
+        <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-classpath"</span> )) == <span class="number">0</span> || <span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-cp"</span> )) == <span class="number">0</span>) {
+            <span class="keyword">do</span> {
+                <span class="keyword">if</span> ( argc &lt; <span class="number">1</span>) {
+                    JLI_ReportErrorMessage( <span class="string">"Error: %s requires class path specification"</span> , arg );
+                    printUsage = <span class="number">1</span> ;
+                    *pret = <span class="number">1</span>;
+                    <span class="keyword">return</span> <span class="number">1</span> ;
+                }
+            }
+            <span class="keyword">while</span> ( <span class="number">0</span> );
+            SetClassPath(*argv);
+            mode = LM_CLASS;
+            argv++; --argc;
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-jar"</span> )) == <span class="number">0</span>) {
+            <span class="keyword">do</span> {
+                <span class="keyword">if</span> ( argc &lt; <span class="number">1</span>) {
+                    JLI_ReportErrorMessage( <span class="string">"Error: %s requires jar file specification"</span> , arg );
+                    printUsage = <span class="number">1</span> ;
+                    *pret = <span class="number">1</span>;
+                    <span class="keyword">return</span> <span class="number">1</span> ;
+                }
+            }
+            <span class="keyword">while</span> ( <span class="number">0</span> );
+            mode = LM_JAR;
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-help"</span> )) == <span class="number">0</span> ||
+                   <span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-h"</span> )) == <span class="number">0</span> ||
+                   <span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-?"</span> )) == <span class="number">0</span>) {
+            printUsage = <span class="number">1</span>;
+            <span class="keyword">return</span> <span class="number">1</span>;
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-version"</span> )) == <span class="number">0</span>) {
+            printVersion = <span class="number">1</span>;
+            <span class="keyword">return</span> <span class="number">1</span>;
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-showversion"</span> )) == <span class="number">0</span>) {
+            showVersion = <span class="number">1</span>;
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-X"</span> )) == <span class="number">0</span>) {
+            printXUsage = <span class="number">1</span>;
+            <span class="keyword">return</span> <span class="number">1</span>;
+<span class="comment">/*</span>
+<span class="comment"> * The following case checks for -XshowSettings OR -XshowSetting:SUBOPT.</span>
+<span class="comment"> * In the latter case, any SUBOPT value not recognized will default to "all"</span>
+<span class="comment"> */</span>
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-XshowSettings"</span> )) == <span class="number">0</span> ||
+                JLI_StrCCmp(arg, <span class="string">"-XshowSettings:"</span>) == <span class="number">0</span>) {
+            showSettings = arg;
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-Xdiag"</span> )) == <span class="number">0</span>) {
+            AddOption(<span class="string">"-Dsun.java.launcher.diag=true"</span>, ((<span class="keyword">void</span> *)<span class="number">0</span>));
+<span class="comment">/*</span>
+<span class="comment"> * The following case provide backward compatibility with old-style</span>
+<span class="comment"> * command line options.</span>
+<span class="comment"> */</span>
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-fullversion"</span> )) == <span class="number">0</span>) {
+            JLI_ReportMessage(<span class="string">"%s full version \"%s\""</span>, _launcher_name, GetFullVersion());
+            <span class="keyword">return</span> <span class="number">0</span>;
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-verbosegc"</span> )) == <span class="number">0</span>) {
+            AddOption(<span class="string">"-verbose:gc"</span>, ((<span class="keyword">void</span> *)<span class="number">0</span>));
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-t"</span> )) == <span class="number">0</span>) {
+            AddOption(<span class="string">"-Xt"</span>, ((<span class="keyword">void</span> *)<span class="number">0</span>));
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-tm"</span> )) == <span class="number">0</span>) {
+            AddOption(<span class="string">"-Xtm"</span>, ((<span class="keyword">void</span> *)<span class="number">0</span>));
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-debug"</span> )) == <span class="number">0</span>) {
+            AddOption(<span class="string">"-Xdebug"</span>, ((<span class="keyword">void</span> *)<span class="number">0</span>));
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-noclassgc"</span> )) == <span class="number">0</span>) {
+            AddOption(<span class="string">"-Xnoclassgc"</span>, ((<span class="keyword">void</span> *)<span class="number">0</span>));
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-Xfuture"</span> )) == <span class="number">0</span>) {
+            AddOption(<span class="string">"-Xverify:all"</span>, ((<span class="keyword">void</span> *)<span class="number">0</span>));
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-verify"</span> )) == <span class="number">0</span>) {
+            AddOption(<span class="string">"-Xverify:all"</span>, ((<span class="keyword">void</span> *)<span class="number">0</span>));
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-verifyremote"</span> )) == <span class="number">0</span>) {
+            AddOption(<span class="string">"-Xverify:remote"</span>, ((<span class="keyword">void</span> *)<span class="number">0</span>));
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-noverify"</span> )) == <span class="number">0</span>) {
+            AddOption(<span class="string">"-Xverify:none"</span>, ((<span class="keyword">void</span> *)<span class="number">0</span>));
+        } <span class="keyword">else</span> <span class="keyword">if</span> (JLI_StrCCmp(arg, <span class="string">"-prof"</span>) == <span class="number">0</span>) {
+            <span class="keyword">char</span> *p = arg + <span class="number">5</span>;
+            <span class="keyword">char</span> *tmp = JLI_MemAlloc(<span class="built_in">strlen</span>(( arg )) + <span class="number">50</span>);
+            <span class="keyword">if</span> (*p) {
+                <span class="built_in">sprintf</span>(tmp, <span class="string">"-Xrunhprof:cpu=old,file=%s"</span>, p + <span class="number">1</span>);
+            } <span class="keyword">else</span> {
+                <span class="built_in">sprintf</span>(tmp, <span class="string">"-Xrunhprof:cpu=old,file=java.prof"</span>);
+            }
+            AddOption(tmp, ((<span class="keyword">void</span> *)<span class="number">0</span>));
+        } <span class="keyword">else</span> <span class="keyword">if</span> (JLI_StrCCmp(arg, <span class="string">"-ss"</span>) == <span class="number">0</span> ||
+                   JLI_StrCCmp(arg, <span class="string">"-oss"</span>) == <span class="number">0</span> ||
+                   JLI_StrCCmp(arg, <span class="string">"-ms"</span>) == <span class="number">0</span> ||
+                   JLI_StrCCmp(arg, <span class="string">"-mx"</span>) == <span class="number">0</span>) {
+            <span class="keyword">char</span> *tmp = JLI_MemAlloc(<span class="built_in">strlen</span>(( arg )) + <span class="number">6</span>);
+            <span class="built_in">sprintf</span>(tmp, <span class="string">"-X%s"</span>, arg + <span class="number">1</span>); <span class="comment">/* skip '-' */</span>
+            AddOption(tmp, ((<span class="keyword">void</span> *)<span class="number">0</span>));
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-checksource"</span> )) == <span class="number">0</span> ||
+                   <span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-cs"</span> )) == <span class="number">0</span> ||
+                   <span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-noasyncgc"</span> )) == <span class="number">0</span>) {
+            <span class="comment">/* No longer supported */</span>
+            JLI_ReportErrorMessage(<span class="string">"Warning: %s option is no longer supported."</span>, arg);
+        } <span class="keyword">else</span> <span class="keyword">if</span> (JLI_StrCCmp(arg, <span class="string">"-version:"</span>) == <span class="number">0</span> ||
+                   <span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-no-jre-restrict-search"</span> )) == <span class="number">0</span> ||
+                   <span class="built_in">strcmp</span>(( arg ), ( <span class="string">"-jre-restrict-search"</span> )) == <span class="number">0</span> ||
+                   JLI_StrCCmp(arg, <span class="string">"-splash:"</span>) == <span class="number">0</span>) {
+            ; <span class="comment">/* Ignore machine independent options already handled */</span>
+        } <span class="keyword">else</span> <span class="keyword">if</span> (ProcessPlatformOption(arg)) {
+            ; <span class="comment">/* Processing of platform dependent options */</span>
+        } <span class="keyword">else</span> <span class="keyword">if</span> (RemovableOption(arg)) {
+            ; <span class="comment">/* Do not pass option to vm. */</span>
+        } <span class="keyword">else</span> {
+            AddOption(arg, ((<span class="keyword">void</span> *)<span class="number">0</span>));
+        }
+    }
+
+    <span class="keyword">if</span> (--argc &gt;= <span class="number">0</span>) {
+        *pwhat = *argv++;
+    }
+
+    <span class="keyword">if</span> (*pwhat == ((<span class="keyword">void</span> *)<span class="number">0</span>)) {
+        *pret = <span class="number">1</span>;
+    } <span class="keyword">else</span> <span class="keyword">if</span> (mode == LM_UNKNOWN) {
+        <span class="comment">/* default to LM_CLASS if -jar and -cp option are</span>
+<span class="comment">         * not specified */</span>
+        mode = LM_CLASS;
+    }
+
+    <span class="keyword">if</span> (argc &gt;= <span class="number">0</span>) {
+        *pargc = argc;
+        *pargv = argv;
+    }
+
+    *pmode = mode;
+
+    <span class="keyword">return</span> <span class="number">1</span>;
+}
+</code></pre>
+<h2 id="开启线程初始化虚拟机并执行main方法"><a href="#开启线程初始化虚拟机并执行main方法" class="headerlink" title="开启线程初始化虚拟机并执行main方法"></a>开启线程初始化虚拟机并执行main方法</h2><p>开启线程传入线程执行的函数<code>JavaMain</code>，在<code>JavaMain</code>中初始化虚拟机并找到主类和执行<code>main</code>方法。</p>
+<pre><code class="c++"><span class="comment">//开启新线程初始化JVM</span>
+ContinueInNewThread(InvocationFunctions* ifn, jlong threadStackSize,
+                    <span class="keyword">int</span> argc, <span class="keyword">char</span> **argv,
+                    <span class="keyword">int</span> mode, <span class="keyword">char</span> *what, <span class="keyword">int</span> ret)
+{
+
+    <span class="comment">/*</span>
+<span class="comment">     * If user doesn't specify stack size, check if VM has a preference.</span>
+<span class="comment">     * Note that HotSpot no longer supports JNI_VERSION_1_1 but it will</span>
+<span class="comment">     * return its default stack size through the init args structure.</span>
+<span class="comment">     */</span>
+     <span class="comment">//如果用户没有用"-Xss"参数指定栈深，则使用默认的，通过GetDefaultJavaVMInitArgs函数获取</span>
+    <span class="keyword">if</span> (threadStackSize == <span class="number">0</span>) {
+      <span class="class"><span class="keyword">struct</span> <span class="title">JDK1_1InitArgs</span> <span class="title">args1_1</span>;</span>
+      <span class="built_in">memset</span>((<span class="keyword">void</span>*)&amp;args1_1, <span class="number">0</span>, <span class="keyword">sizeof</span>(args1_1));
+      args1_1.version = <span class="number">0x00010001</span>;
+      ifn-&gt;GetDefaultJavaVMInitArgs(&amp;args1_1);  <span class="comment">/* ignore return value */</span>
+      <span class="keyword">if</span> (args1_1.javaStackSize &gt; <span class="number">0</span>) {
+         threadStackSize = args1_1.javaStackSize;
+      }
+    }
+
+    { <span class="comment">/* Create a new thread to create JVM and invoke main method */</span>
+      JavaMainArgs args;
+      <span class="keyword">int</span> rslt;
+
+      args.argc = argc;
+      args.argv = argv;
+      args.mode = mode;
+      args.what = what;
+      args.ifn = *ifn;
+
+      <span class="comment">//创建线程，第一个参数是线程执行函数，第二个是线程属性，第三个是函数参数</span>
+      rslt = ContinueInNewThread0(JavaMain, threadStackSize, (<span class="keyword">void</span>*)&amp;args);
+      <span class="comment">/* If the caller has deemed there is an error we</span>
+<span class="comment">       * simply return that, otherwise we return the value of</span>
+<span class="comment">       * the callee</span>
+<span class="comment">       */</span>
+      <span class="keyword">return</span> (ret != <span class="number">0</span>) ? ret : rslt;
+    }
+}
+
+int ContinueInNewThread0(int ( *continuation)(void *), jlong stack_size, void * args) {
+    <span class="keyword">int</span> rslt;
+    <span class="keyword">pthread_t</span> tid;
+    <span class="keyword">pthread_attr_t</span> attr;
+    pthread_attr_init(&amp;attr);
+    pthread_attr_setdetachstate(&amp;attr, PTHREAD_CREATE_JOINABLE);
+
+    <span class="keyword">if</span> (stack_size &gt; <span class="number">0</span>) {
+      pthread_attr_setstacksize(&amp;attr, stack_size);
+    }
+    <span class="comment">//第一个参数为指向线程标识符的指针。第二个参数用来设置线程属性。</span>
+    <span class="comment">//第三个参数是线程运行函数的起始地址。最后一个参数是运行函数的参数。</span>
+    <span class="keyword">if</span> (pthread_create(&amp;tid, &amp;attr, (<span class="keyword">void</span> *(*)(<span class="keyword">void</span>*))continuation, (<span class="keyword">void</span>*)args) == <span class="number">0</span>) {
+      <span class="keyword">void</span> * tmp;
+      <span class="comment">//代码中如果没有pthread_join主线程会很快结束从而使整个进程结束，从而使创建的线程没有机会开始执行就结束了。</span>
+      <span class="comment">//加入pthread_join后，主线程会一直等待直到等待的线程结束自己才结束，使创建的线程有机会执行。</span>
+      pthread_join(tid, &amp;tmp);
+      rslt = (<span class="keyword">int</span>)tmp;
+    } <span class="keyword">else</span> {
+     <span class="comment">/*</span>
+<span class="comment">      * Continue execution in current thread if for some reason (e.g. out of</span>
+<span class="comment">      * memory/LWP)  a new thread can't be created. This will likely fail</span>
+<span class="comment">      * later in continuation as JNI_CreateJavaVM needs to create quite a</span>
+<span class="comment">      * few new threads, anyway, just give it a try..</span>
+<span class="comment">      */</span>
+      <span class="comment">//直接执行函数</span>
+      rslt = continuation(args);
+    }
+
+    pthread_attr_destroy(&amp;attr);
+    <span class="keyword">return</span> rslt;
+}
+
+
+<span class="function"><span class="keyword">int</span> <span class="title">JavaMain</span><span class="params">(<span class="keyword">void</span> * _args)</span></span>
+<span class="function"></span>{
+    JavaMainArgs *args = (JavaMainArgs *)_args;
+    <span class="keyword">int</span> argc = args-&gt;argc;
+    <span class="keyword">char</span> **argv = args-&gt;argv;
+    <span class="keyword">int</span> mode = args-&gt;mode;
+    <span class="keyword">char</span> *what = args-&gt;what;
+    InvocationFunctions ifn = args-&gt;ifn;
+
+    <span class="comment">//这两个参数在创建虚拟机时被初始化</span>
+    JavaVM *vm = <span class="number">0</span>;
+    JNIEnv *env = <span class="number">0</span>;
+    jclass mainClass = ((<span class="keyword">void</span> *)<span class="number">0</span>);
+    jclass appClass = ((<span class="keyword">void</span> *)<span class="number">0</span>); <span class="comment">// actual application class being launched</span>
+    jmethodID mainID;
+    jobjectArray mainArgs;
+    <span class="keyword">int</span> ret = <span class="number">0</span>;
+    jlong start, end;
+
+    <span class="comment">//Linux 并未实现</span>
+    RegisterThread();
+
+    <span class="comment">/* Initialize the virtual machine */</span>
+    start = (<span class="number">0</span>);
+    <span class="keyword">if</span> (!InitializeJVM(&amp;vm, &amp;env, &amp;ifn)) {
+        JLI_ReportErrorMessage(<span class="string">"Error: Could not create the Java Virtual Machine.\n"</span> 
+        <span class="string">"Error: A fatal exception has occurred. Program will exit."</span>);
+        <span class="built_in">exit</span>(<span class="number">1</span>);
+    }
+
+    <span class="keyword">if</span> (showSettings != ((<span class="keyword">void</span> *)<span class="number">0</span>)) {
+        ShowSettings(env, showSettings);
+        ......
+    }
+
+    <span class="keyword">if</span> (printVersion || showVersion) {
+        PrintJavaVersion(env, showVersion);
+        ......
+    }
+
+    <span class="comment">/* If the user specified neither a class name nor a JAR file */</span>
+    <span class="keyword">if</span> (printXUsage || printUsage || what == <span class="number">0</span> || mode == LM_UNKNOWN) {
+        PrintUsage(env, printXUsage);
+        ......
+    }
+
+    <span class="comment">//释放Knownvms变量</span>
+    FreeKnownVMs();  <span class="comment">/* after last possible PrintUsage() */</span>
+
+    <span class="comment">//打印调试的信息</span>
+    ......
+
+    ret = <span class="number">1</span>;
+
+    <span class="comment">/*</span>
+<span class="comment">     * Get the application's main class.</span>
+<span class="comment">     *</span>
+<span class="comment">     * See bugid 5030265.  The Main-Class name has already been parsed</span>
+<span class="comment">     * from the manifest, but not parsed properly for UTF-8 support.</span>
+<span class="comment">     * Hence the code here ignores the value previously extracted and</span>
+<span class="comment">     * uses the pre-existing code to reextract the value.  This is</span>
+<span class="comment">     * possibly an end of release cycle expedient.  However, it has</span>
+<span class="comment">     * also been discovered that passing some character sets through</span>
+<span class="comment">     * the environment has "strange" behavior on some variants of</span>
+<span class="comment">     * Windows.  Hence, maybe the manifest parsing code local to the</span>
+<span class="comment">     * launcher should never be enhanced.</span>
+<span class="comment">     *</span>
+<span class="comment">     * Hence, future work should either:</span>
+<span class="comment">     *     1)   Correct the local parsing code and verify that the</span>
+<span class="comment">     *          Main-Class attribute gets properly passed through</span>
+<span class="comment">     *          all environments,</span>
+<span class="comment">     *     2)   Remove the vestages of maintaining main_class through</span>
+<span class="comment">     *          the environment (and remove these comments).</span>
+<span class="comment">     *</span>
+<span class="comment">     * This method also correctly handles launching existing JavaFX</span>
+<span class="comment">     * applications that may or may not have a Main-Class manifest entry.</span>
+<span class="comment">     */</span>
+    <span class="comment">//获取主类</span>
+    mainClass = LoadMainClass(env, mode, what);
+    CHECK_EXCEPTION_NULL_LEAVE(mainClass);
+    <span class="comment">/*</span>
+<span class="comment">     * In some cases when launching an application that needs a helper, e.g., a</span>
+<span class="comment">     * JavaFX application with no main method, the mainClass will not be the</span>
+<span class="comment">     * applications own main class but rather a helper class. To keep things</span>
+<span class="comment">     * consistent in the UI we need to track and report the application main class.</span>
+<span class="comment">     */</span>
+    <span class="comment">//在checkAndLoadMain方法中已经赋值为mainClass</span>
+    appClass = GetApplicationClass(env);
+    NULL_CHECK_RETURN_VALUE(appClass, <span class="number">-1</span>);
+    <span class="comment">/*</span>
+<span class="comment">     * PostJVMInit uses the class name as the application name for GUI purposes,</span>
+<span class="comment">     * for example, on OSX this sets the application name in the menu bar for</span>
+<span class="comment">     * both SWT and JavaFX. So we'll pass the actual application class here</span>
+<span class="comment">     * instead of mainClass as that may be a launcher or helper class instead</span>
+<span class="comment">     * of the application class.</span>
+<span class="comment">     */</span>
+    <span class="comment">//Linux未实现</span>
+    PostJVMInit(env, appClass, vm);
+    <span class="comment">/*</span>
+<span class="comment">     * The LoadMainClass not only loads the main class, it will also ensure</span>
+<span class="comment">     * that the main method's signature is correct, therefore further checking</span>
+<span class="comment">     * is not required. The main method is invoked here so that extraneous java</span>
+<span class="comment">     * stacks are not in the application stack trace.</span>
+<span class="comment">     */</span>
+     <span class="comment">//获取main方法的引用</span>
+    mainID = (*env)-&gt;GetStaticMethodID(env, mainClass, <span class="string">"main"</span>,
+                                       <span class="string">"([Ljava/lang/String;)V"</span>);
+    CHECK_EXCEPTION_NULL_LEAVE(mainID);
+
+    <span class="comment">/* Build platform specific argument array */</span>
+    <span class="comment">//创建java类型的参数</span>
+    mainArgs = CreateApplicationArgs(env, argv, argc);
+    CHECK_EXCEPTION_NULL_LEAVE(mainArgs);
+
+    <span class="comment">/* Invoke main method. */</span>
+    <span class="comment">//调用main方法</span>
+    (*env)-&gt;CallStaticVoidMethod(env, mainClass, mainID, mainArgs);
+
+    <span class="comment">/*</span>
+<span class="comment">     * The launcher's exit code (in the absence of calls to</span>
+<span class="comment">     * System.exit) will be non-zero if main threw an exception.</span>
+<span class="comment">     */</span>
+    ret = (*env)-&gt;ExceptionOccurred(env) == ((<span class="keyword">void</span> *)<span class="number">0</span>) ? <span class="number">0</span> : <span class="number">1</span>;
+    LEAVE();
+}
+</code></pre>
+<h3 id="初始化虚拟机"><a href="#初始化虚拟机" class="headerlink" title="初始化虚拟机"></a>初始化虚拟机</h3><p>虚拟机初始化的具体实现并不在<code>java.c</code>文件中，而是在动态链接库中，其实现比较复杂，大体上应该是创建虚拟机环境，包括内存模型、线程模型、以及垃圾回收等。返回虚拟机环境的一些接口，这些接口定义在<code>jni.h</code>文件中。这里不对实现做深入研究，简单看下几个接口的作用。<br>请参考:[<a href="https://docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/functions.html" target="_blank" rel="noopener">https://docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/functions.html</a>]</p>
+<ul>
+<li><code>jmethodID GetStaticMethodID(JNIEnv *env, jclass clazz,const char *name, const char *sig);</code>获取类中静态方法的引用。参数分别是：虚拟机环境、类、方法名、方法声明。</li>
+<li><code>CallStatic&lt;type&gt;Method(JNIEnv *env, jclass clazz,jmethodID methodID, ...);</code>调用静态方法。<code>...</code>是方法参数。</li>
+</ul>
+<pre><code class="c++">
+<span class="comment">//初始化JVM  ifn是JAVA_DLL库中的几个函数</span>
+<span class="keyword">static</span> jboolean
+InitializeJVM(JavaVM **pvm, JNIEnv **penv, InvocationFunctions *ifn)
+{
+    JavaVMInitArgs args;
+    jint r;
+
+    <span class="comment">//作用是在一段内存块中填充某个给定的值，它对较大的结构体或数组进行清零操作的一种最快方法。</span>
+    <span class="built_in">memset</span>(&amp;args, <span class="number">0</span>, <span class="keyword">sizeof</span>(args));
+    <span class="comment">//下面这些参数在环境准备时已经准备好了</span>
+    args.version  = <span class="number">0x00010002</span>;
+    args.nOptions = numOptions;
+    args.options  = options;
+    args.ignoreUnrecognized = <span class="number">0</span>;
+
+    <span class="keyword">if</span> (JLI_IsTraceLauncher()) {
+        <span class="keyword">int</span> i = <span class="number">0</span>;
+        <span class="built_in">printf</span>(<span class="string">"JavaVM args:\n    "</span>);
+        <span class="built_in">printf</span>(<span class="string">"version 0x%08lx, "</span>, (<span class="keyword">long</span>)args.version);
+        <span class="built_in">printf</span>(<span class="string">"ignoreUnrecognized is %s, "</span>,
+               args.ignoreUnrecognized ? <span class="string">"JNI_TRUE"</span> : <span class="string">"JNI_FALSE"</span>);
+        <span class="built_in">printf</span>(<span class="string">"nOptions is %ld\n"</span>, (<span class="keyword">long</span>)args.nOptions);
+        <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; numOptions; i++)
+            <span class="built_in">printf</span>(<span class="string">"    option[%2d] = '%s'\n"</span>,
+                   i, args.options[i].optionString);
+    }
+    <span class="comment">//创建虚拟机实例并返回，之前只是加载动态库，到这里才正式创建虚拟机</span>
+    r = ifn-&gt;CreateJavaVM(pvm, (<span class="keyword">void</span> **)penv, &amp;args);
+    JLI_MemFree(options);
+    <span class="keyword">return</span> r == <span class="number">0</span>;
+}
+</code></pre>
+<h3 id="加载主类"><a href="#加载主类" class="headerlink" title="加载主类"></a>加载主类</h3><p><code>JVM</code>加载<code>HelloJNI</code>类时并不是直接加载，而是先加载<code>sun.launcher.LauncherHelper</code>,调用该类中的<code>checkAndLoadMain</code>方法去加载<code>HelloJNI</code>类。然后在调用<code>HelloJNI</code>的<code>main</code>方法。这样做的目的是把类加载的方式交给用户自己定义。</p>
+<pre><code class="c++"><span class="comment">//加载主类</span>
+<span class="keyword">static</span> jclass
+LoadMainClass(JNIEnv *env, <span class="keyword">int</span> mode, <span class="keyword">char</span> *name)
+{
+    jmethodID mid;
+    jstring str;
+    jobject result;
+    jlong start, end;
+    <span class="comment">//找到 sun/launcher/LauncherHelper 类</span>
+    jclass cls = GetLauncherHelperClass(env);
+    <span class="comment">//检查是否为null</span>
+    NULL_CHECK0(cls);
+    <span class="keyword">if</span> (JLI_IsTraceLauncher()) {
+        start = (<span class="number">0</span>);
+    }
+    <span class="comment">//用虚拟机提供的函数获取"sun/launcher/LauncherHelper"类中"checkAndLoadMain"静态方法</span>
+    NULL_CHECK0(mid = (*env)-&gt;GetStaticMethodID(env, cls,
+                <span class="string">"checkAndLoadMain"</span>,
+                <span class="string">"(ZILjava/lang/String;)Ljava/lang/Class;"</span>));
+
+    <span class="comment">//获取java语言中的String，java中String是个对象，而不是字符数组</span>
+    str = NewPlatformString(env, name);
+    <span class="comment">//调用checkAndLoadMain方法，加载主类</span>
+    result = (*env)-&gt;CallStaticObjectMethod(env, cls, mid, <span class="number">1</span>, mode, str);
+
+    <span class="keyword">if</span> (JLI_IsTraceLauncher()) {
+        end   = (<span class="number">0</span>);
+        <span class="built_in">printf</span>(<span class="string">"%ld micro seconds to load main class\n"</span>,
+               (<span class="keyword">long</span>)(jint)(<span class="number">1</span>));
+        <span class="built_in">printf</span>(<span class="string">"----%s----\n"</span>, <span class="string">"_JAVA_LAUNCHER_DEBUG"</span>);
+    }
+
+    <span class="keyword">return</span> (jclass)result;
+}
+
+<span class="function">jclass <span class="title">GetLauncherHelperClass</span><span class="params">(JNIEnv *env)</span></span>
+<span class="function"></span>{
+    <span class="keyword">if</span> (helperClass == ((<span class="keyword">void</span> *)<span class="number">0</span>)) {
+        <span class="keyword">do</span> {
+            <span class="keyword">if</span> (( helperClass = FindBootStrapClass ( env , <span class="string">"sun/launcher/LauncherHelper"</span> ) ) == ((<span class="keyword">void</span> *)<span class="number">0</span>) ) {
+                JLI_ReportErrorMessage( <span class="string">"Error: A JNI error has occurred, please check your installation and try again"</span> );
+                <span class="keyword">return</span> <span class="number">0</span> ;
+            }
+        }
+        <span class="keyword">while</span> ( <span class="number">0</span> );
+    }
+    <span class="keyword">return</span> helperClass;
+}
+
+
+<span class="function">jclass <span class="title">FindBootStrapClass</span><span class="params">(JNIEnv *env, <span class="keyword">const</span> <span class="keyword">char</span>* classname)</span></span>
+<span class="function"></span>{
+   <span class="keyword">if</span> (findBootClass == <span class="literal">NULL</span>) {
+       <span class="comment">//根据 动态链接库 操作句柄(handle)与符号(symbol)，返回符号对应的地址。使用这个函数不但可以获取函数地址，也可以获取变量地址。</span>
+       <span class="comment">//在handle为RTLD_DEFAULT的情况中，linker将遍历系统中已经加载的所有动态链接库，并在每一个动态连接库里查找那个符号。</span>
+       <span class="comment">//获取函数JVM_FindClassFromBootLoader的指针</span>
+       findBootClass = (FindClassFromBootLoader_t *)dlsym(RTLD_DEFAULT,
+          <span class="string">"JVM_FindClassFromBootLoader"</span>);
+       <span class="keyword">if</span> (findBootClass == <span class="literal">NULL</span>) {
+           JLI_ReportErrorMessage(DLL_ERROR4,
+               <span class="string">"JVM_FindClassFromBootLoader"</span>);
+           <span class="keyword">return</span> <span class="literal">NULL</span>;
+       }
+   }
+   <span class="keyword">return</span> findBootClass(env, classname);
+}
+
+<span class="comment">/*</span>
+<span class="comment"> * Returns a new Java string object for the specified platform string.</span>
+<span class="comment"> */</span>
+<span class="function"><span class="keyword">static</span> jstring <span class="title">NewPlatformString</span><span class="params">(JNIEnv *env, <span class="keyword">char</span> *s)</span></span>
+<span class="function"></span>{
+    <span class="keyword">int</span> len = (<span class="keyword">int</span>)JLI_StrLen(s);
+    jbyteArray ary;
+    jclass cls = GetLauncherHelperClass(env);
+    NULL_CHECK0(cls);
+    <span class="keyword">if</span> (s == <span class="literal">NULL</span>)
+        <span class="keyword">return</span> <span class="number">0</span>;
+
+    ary = (*env)-&gt;NewByteArray(env, len);
+    <span class="keyword">if</span> (ary != <span class="number">0</span>) {
+        jstring str = <span class="number">0</span>;
+        (*env)-&gt;SetByteArrayRegion(env, ary, <span class="number">0</span>, len, (jbyte *)s);
+        <span class="keyword">if</span> (!(*env)-&gt;ExceptionOccurred(env)) {
+            <span class="keyword">if</span> (makePlatformStringMID == <span class="literal">NULL</span>) {
+                NULL_CHECK0(makePlatformStringMID = (*env)-&gt;GetStaticMethodID(env,
+                        cls, <span class="string">"makePlatformString"</span>, <span class="string">"(Z[B)Ljava/lang/String;"</span>));
+            }
+            str = (*env)-&gt;CallStaticObjectMethod(env, cls,
+                    makePlatformStringMID, USE_STDERR, ary);
+            (*env)-&gt;DeleteLocalRef(env, ary);
+            <span class="keyword">return</span> str;
+        }
+    }
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</code></pre>
+<p>而checkAndLoadMain又做了哪些事情呢。</p>
+<ul>
+<li>如果是<code>jar</code>模式，则从<code>manifest</code>文件中获取类名。</li>
+<li>使用<code>System ClassLoader</code>加载类。</li>
+<li>确保<code>main</code>方法的有效性和可访问。</li>
+<li><code>FX Application</code>相关。</li>
+</ul>
+<pre><code class="java"><span class="comment">/**</span>
+<span class="comment"> * This method does the following:</span>
+<span class="comment"> * 1. gets the classname from a Jar's manifest, if necessary</span>
+<span class="comment"> * 2. loads the class using the System ClassLoader</span>
+<span class="comment"> * 3. ensures the availability and accessibility of the main method,</span>
+<span class="comment"> *    using signatureDiagnostic method.</span>
+<span class="comment"> *    a. does the class exist</span>
+<span class="comment"> *    b. is there a main</span>
+<span class="comment"> *    c. is the main public</span>
+<span class="comment"> *    d. is the main static</span>
+<span class="comment"> *    e. does the main take a String array for args</span>
+<span class="comment"> * 4. if no main method and if the class extends FX Application, then call</span>
+<span class="comment"> *    on FXHelper to determine the main class to launch</span>
+<span class="comment"> * 5. and off we go......</span>
+<span class="comment"> *</span>
+<span class="comment"> * <span class="doctag">@param</span> printToStderr if set, all output will be routed to stderr</span>
+<span class="comment"> * <span class="doctag">@param</span> mode LaunchMode as determined by the arguments passed on the</span>
+<span class="comment"> * command line</span>
+<span class="comment"> * <span class="doctag">@param</span> what either the jar file to launch or the main class when using</span>
+<span class="comment"> * LM_CLASS mode</span>
+<span class="comment"> * <span class="doctag">@return</span> the application's main class</span>
+<span class="comment"> */</span>
+<span class="keyword">public</span> <span class="keyword">static</span> Class&lt;?&gt; checkAndLoadMain(<span class="keyword">boolean</span> printToStderr,
+                                        <span class="keyword">int</span> mode,
+                                        String what) {
+    initOutput(printToStderr);
+    <span class="comment">// get the class name</span>
+    String cn = <span class="keyword">null</span>;
+    <span class="keyword">switch</span> (mode) {
+        <span class="keyword">case</span> LM_CLASS:
+            cn = what;
+            <span class="keyword">break</span>;
+        <span class="keyword">case</span> LM_JAR:
+            cn = getMainClassFromJar(what);
+            <span class="keyword">break</span>;
+        <span class="keyword">default</span>:
+            <span class="comment">// should never happen</span>
+            <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(<span class="string">""</span> + mode + <span class="string">": Unknown launch mode"</span>);
+    }
+    cn = cn.replace(<span class="string">'/'</span>, <span class="string">'.'</span>);
+    Class&lt;?&gt; mainClass = <span class="keyword">null</span>;
+    <span class="keyword">try</span> {
+        mainClass = scloader.loadClass(cn);
+    } <span class="keyword">catch</span> (NoClassDefFoundError | ClassNotFoundException cnfe) {
+        <span class="keyword">if</span> (System.getProperty(<span class="string">"os.name"</span>, <span class="string">""</span>).contains(<span class="string">"OS X"</span>)
+            &amp;&amp; Normalizer.isNormalized(cn, Normalizer.Form.NFD)) {
+            <span class="keyword">try</span> {
+                <span class="comment">// On Mac OS X since all names with diacretic symbols are given as decomposed it</span>
+                <span class="comment">// is possible that main class name comes incorrectly from the command line</span>
+                <span class="comment">// and we have to re-compose it</span>
+                mainClass = scloader.loadClass(Normalizer.normalize(cn, Normalizer.Form.NFC));
+            } <span class="keyword">catch</span> (NoClassDefFoundError | ClassNotFoundException cnfe1) {
+                abort(cnfe, <span class="string">"java.launcher.cls.error1"</span>, cn);
+            }
+        } <span class="keyword">else</span> {
+            abort(cnfe, <span class="string">"java.launcher.cls.error1"</span>, cn);
+        }
+    }
+    <span class="comment">// set to mainClass</span>
+    appClass = mainClass;
+
+    <span class="comment">/*</span>
+<span class="comment">     * Check if FXHelper can launch it using the FX launcher. In an FX app,</span>
+<span class="comment">     * the main class may or may not have a main method, so do this before</span>
+<span class="comment">     * validating the main class.</span>
+<span class="comment">     */</span>
+    <span class="keyword">if</span> (mainClass.equals(FXHelper.class) ||
+            FXHelper.doesExtendFXApplication(mainClass)) {
+        <span class="comment">// Will abort() if there are problems with the FX runtime</span>
+        FXHelper.setFXLaunchParameters(what, mode);
+        <span class="keyword">return</span> FXHelper.class;
+    }
+
+    validateMainClass(mainClass);
+    <span class="keyword">return</span> mainClass;
+}
+</code></pre>
+<blockquote>
+<p>参考：<a href="http://www.jianshu.com/p/b91258bc08ac" target="_blank" rel="noopener">简书占小狼</a></p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OpenJDK/" rel="tag"># OpenJDK</a>
+          
+            <a href="/tags/jvm/" rel="tag"># jvm</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/08/JNDI是什么/" rel="next" title="JNDI是什么">
+                <i class="fa fa-chevron-left"></i> JNDI是什么
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/10/跳一跳辅助的java实现/" rel="prev" title="跳一跳辅助的java实现">
+                跳一跳辅助的java实现 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div onclick="showGitment()" id="gitment-display-button">显示 Gitment 评论</div>
+        <div id="gitment-container" style="display:none"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/gougou.jpg"
+                alt="鸡哥" />
+            
+              <p class="site-author-name" itemprop="name">鸡哥</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/jiges" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i></a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:ccr12312@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i></a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM启动流程"><span class="nav-number">2.</span> <span class="nav-text">JVM启动流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#源码分析"><span class="nav-number">3.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#环境准备动态库查找"><span class="nav-number">3.1.</span> <span class="nav-text">环境准备动态库查找</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动态库加载"><span class="nav-number">3.2.</span> <span class="nav-text">动态库加载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#options解析"><span class="nav-number">3.3.</span> <span class="nav-text">options解析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开启线程初始化虚拟机并执行main方法"><span class="nav-number">3.4.</span> <span class="nav-text">开启线程初始化虚拟机并执行main方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化虚拟机"><span class="nav-number">3.4.1.</span> <span class="nav-text">初始化虚拟机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#加载主类"><span class="nav-number">3.4.2.</span> <span class="nav-text">加载主类</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">鸡哥</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'jiges',
+            repo: 'jiges.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '3bfafe08bfcef158878f09910c6a9f2aef7391de',
+            
+                client_id: 'c41b93a72f2b21dcc1ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      function showGitment(){
+        document.getElementById("gitment-display-button").style.display = "none";
+        document.getElementById("gitment-container").style.display = "block";
+        renderGitment();
+      }
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("paa9xqTl09B7K7pJzx3tI8A7-gzGzoHsz", "Tt2YuM3CWPcI5gNeGiQR9qeh");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
