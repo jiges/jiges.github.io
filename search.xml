@@ -501,9 +501,9 @@ Java_sun_nio_ch_WindowsAsynchronousFileChannelImpl_writeFile(JNIEnv* env, jclass
         
         <tags>
             
-            <tag> java </tag>
-            
             <tag> I/O </tag>
+            
+            <tag> java </tag>
             
         </tags>
         
