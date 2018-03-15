@@ -368,11 +368,11 @@ result[<span class="number">0</span>]
     <span class="keyword">public</span> Path  path;
     <span class="keyword">public</span> ByteBuffer buffer;
     <span class="keyword">public</span> AsynchronousFileChannel asyncChannel;
-    <span class="keyword">public</span> <span class="keyword">int</span> count = <span class="number">0</span>;
+    <span class="keyword">public</span> <span class="keyword">int</span> count = <span class="number">2000</span>;
 
-    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">close</span><span class="params">()</span></span>{
+    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">close</span><span class="params">()</span></span>{
         System.out.println(count);
-        <span class="keyword">if</span>(++ count &gt;= <span class="number">2000</span>) {
+        <span class="keyword">if</span>(count -- &lt;= <span class="number">0</span>) {
             <span class="keyword">try</span> {
                 <span class="keyword">this</span>.asyncChannel.close();
             } <span class="keyword">catch</span> (IOException e) {
