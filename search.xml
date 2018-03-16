@@ -481,7 +481,7 @@ Java_sun_nio_ch_WindowsAsynchronousFileChannelImpl_writeFile(JNIEnv* env, jclass
 <li>减少<code>IO</code>发生的次数可以提高文件读写的效率。具体操作是一次读取/写入多个字节。</li>
 <li>在相同缓存大小的情况下<code>read(byte[])</code>比<code>BufferedInputStream</code>效率要高，虽然从源码上看二者产不多，但实际上<code>read(byte[])</code>要快很多，具体原因可能与<code>synchronized</code>关键字有关。</li>
 <li><code>NIO</code>的文件读写效率比<code>read(byte[])</code>差不多，二者都是调用底层的<code>write</code>函数，但<code>NIO</code>提供了比较方便的API。</li>
-<li><code>AIO</code>并没有加速<code>IO</code>处理速度，只是利用回调和通知机制改变了业务处理时机，使得具体逻辑可以不关注<code>IO</code>结果，只需在合理的时机添加回调即可。但是多线程的文件读写并没有比同步的读写快，原因不清楚。<code>windows</code>系统的异步<code>IO</code>是通过<code>IOCP</code>完成的。</li>
+<li><code>AIO</code>并没有加速<code>IO</code>处理速度，只是利用回调和通知机制改变了业务处理时机，使得具体逻辑可以不关注<code>IO</code>结果，只需在合理的时机添加回调即可。但是从上面的例子可以看出，多线程的文件读写并没有比同步的读写快，那是<strong>因为<code>AsynchronousFileChannel</code>在对文件进行写时锁住了文件通道，可以这么理解，通道只有一个，每次只允许一个<code>IO</code>操作,所以多线程在对一个文件读写时是无效的</strong>，如果写多个文件，多线程要快的多，比如写2000个文件。<code>windows</code>系统的异步<code>IO</code>是通过<code>IOCP</code>完成的。</li>
 </ul>
 <h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><ul>
 <li><code>read(byte[])</code>比<code>BufferedInputStream</code>效率高具体是什么原因导致的。</li>
@@ -501,9 +501,9 @@ Java_sun_nio_ch_WindowsAsynchronousFileChannelImpl_writeFile(JNIEnv* env, jclass
         
         <tags>
             
-            <tag> I/O </tag>
-            
             <tag> java </tag>
+            
+            <tag> I/O </tag>
             
         </tags>
         
