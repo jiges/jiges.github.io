@@ -81,7 +81,7 @@
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="鸡哥の博客">
-<meta property="og:url" content="https://jiges.github.io/categories/java/I-O/index.html">
+<meta property="og:url" content="https://jiges.github.io/page/2/index.html">
 <meta property="og:site_name" content="鸡哥の博客">
 <meta property="og:locale" content="zh-Hans">
 <meta name="twitter:card" content="summary">
@@ -115,13 +115,13 @@
 
 
 
-  <link rel="canonical" href="https://jiges.github.io/categories/java/I-O/"/>
+  <link rel="canonical" href="https://jiges.github.io/page/2/"/>
 
 
 
 
 
-  <title>分类: I/O | 鸡哥の博客</title>
+  <title>鸡哥の博客</title>
   
 
 
@@ -140,7 +140,8 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left 
+  page-home">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -267,83 +268,171 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
+  <section id="posts" class="posts-expand">
+    
+      
+
+  
 
   
   
   
-  <div class="post-block category">
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>I/O<small>分类</small>
-        </h1>
-      </div>
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://jiges.github.io/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="鸡哥">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/gougou.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="鸡哥の博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/" itemprop="url">win10利用Netbeans远程构建调试OpenJDK</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-10T08:25:31+08:00">
+                2017-11-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OpenJDK/" itemprop="url" rel="index">
+                    <span itemprop="name">OpenJDK</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/" class="leancloud_visitors" data-flag-title="win10利用Netbeans远程构建调试OpenJDK">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
 
       
         
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/03/01/BIO、NIO与AIO-一/" itemprop="url">
-              
-                <span itemprop="name">BIO、NIO与AIO(一)</span>
-              
+          <h1 id="NetBeans远程开发"><a href="#NetBeans远程开发" class="headerlink" title="NetBeans远程开发"></a>NetBeans远程开发</h1><p>在开发<code>linux</code>下的<code>C/C++</code>程序的时候，不可避免的会遇到在<code>windows</code>下进行开发，而在<code>linux</code>上编译和调试的场景。常见的解决方式是在<code>windows</code>上安装一个<code>linux</code>虚拟机，然后在<code>Linux</code>上编写代码，编译和调试。如果虚拟机不装图形界面会导致开发效率低，而如果安装了图形界面又会大量的占用系统资源。安装无界面的<code>linux</code>虚拟机，同时使用<code>NetBeans</code>的远程开发功能在<code>windows</code>下进行开发，可以很好的解决这个问题。<br>需要了解<code>NetBeans</code>远程开发请参考：<a href="https://netbeans.org/kb/docs/cnd/remotedev-tutorial_zh_CN.html" target="_blank" rel="noopener">https://netbeans.org/kb/docs/cnd/remotedev-tutorial_zh_CN.html</a><br>众所周知，在<code>windows</code>上编译及调试<code>openJDK</code>极为复杂，会遇到各种各样的问题，而且网络上的教程很少且大部分是以前的版本。而在<code>Linux</code>上编译调试<code>OpenJDK</code>相对简单的多。利用这一点，读者可在<code>windows</code>上安装<code>NetBeans</code>，利用其远程开发的功能，实现在<code>windows</code>上使用<code>Linux</code>环境对<code>OpenJdk</code>进行调试。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/11/10/win10利用Netbeans远程构建调试OpenJDK/#more" rel="contents">
+              阅读全文 &raquo;
             </a>
+          </div>
+          <!--/noindex-->
         
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-03-01T14:38:46+08:00"
-              content="2018-03-01" >
-          03-01
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/02/07/五大IO模型/" itemprop="url">
-              
-                <span itemprop="name">五大IO模型</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-02-07T08:49:51+08:00"
-              content="2018-02-07" >
-          02-07
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
       
     </div>
+    
+    
+    
 
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
   </div>
   
   
   
+  </article>
+
+
+    
+  </section>
 
   
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+  </nav>
 
 
 
